@@ -16,26 +16,23 @@ import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.DamageInfo;
-import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.dungeons.TheCity;
 import com.megacrit.cardcrawl.helpers.CardHelper;
 import com.megacrit.cardcrawl.helpers.FontHelper;
-import com.megacrit.cardcrawl.helpers.PowerTip;
-import com.megacrit.cardcrawl.helpers.TipHelper;
 import com.megacrit.cardcrawl.localization.*;
-import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
-import com.megacrit.cardcrawl.rooms.MonsterRoom;
 import com.megacrit.cardcrawl.unlock.UnlockTracker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import testMod.cards.*;
 import testMod.characters.TheDefault;
 import testMod.events.IdentityCrisisEvent;
+import testMod.model.CombatStats;
 import testMod.model.EnemyCombatStats;
+import testMod.model.FightTracker;
 import testMod.potions.PlaceholderPotion;
 import testMod.relics.BottledPlaceholderRelic;
 import testMod.relics.DefaultClickableRelic;
@@ -51,8 +48,6 @@ import testMod.variables.DefaultSecondMagicNumber;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Properties;
 
 //TODO: DON'T MASS RENAME/REFACTOR
@@ -391,7 +386,19 @@ public class DefaultMod extends OnPlayerDamagedHook implements
 
 
         // TODO: figure out how to properly load stats from a file.
-        statsStore.stats = StatsUtils.generateTestStats();
+        try {
+            Gson gson = new Gson();
+            String sourceStats = "{\"enemyCombatStatsMap\":{\"Cultist\":{\"The Silent\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":4,\"wins\":0,\"loss\":4,\"averageDamageTaken\":39.8706,\"averageDamageDealt\":14.15554,\"averageTurnsToWin\":1.9362346},\"The Watcher\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":1,\"wins\":0,\"loss\":1,\"averageDamageTaken\":13.711613,\"averageDamageDealt\":13.286872,\"averageTurnsToWin\":10.84672},\"The Defect\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":9,\"wins\":5,\"loss\":4,\"averageDamageTaken\":28.311348,\"averageDamageDealt\":12.114415,\"averageTurnsToWin\":6.437801},\"The Ironclad\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":2,\"wins\":0,\"loss\":2,\"averageDamageTaken\":16.327467,\"averageDamageDealt\":33.701447,\"averageTurnsToWin\":3.3450832}},\"2 Louse\":{\"The Silent\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":1,\"wins\":1,\"loss\":0,\"averageDamageTaken\":20.29732,\"averageDamageDealt\":36.324097,\"averageTurnsToWin\":4.158781},\"The Watcher\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":10,\"wins\":9,\"loss\":1,\"averageDamageTaken\":38.494812,\"averageDamageDealt\":42.39269,\"averageTurnsToWin\":10.586774},\"The Defect\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":6,\"wins\":5,\"loss\":1,\"averageDamageTaken\":38.53638,\"averageDamageDealt\":11.857495,\"averageTurnsToWin\":5.7880707},\"The Ironclad\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":8,\"wins\":6,\"loss\":2,\"averageDamageTaken\":49.592567,\"averageDamageDealt\":30.074987,\"averageTurnsToWin\":8.314305}},\"Jaw Worm\":{\"The Silent\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":8,\"wins\":5,\"loss\":3,\"averageDamageTaken\":17.060352,\"averageDamageDealt\":28.809082,\"averageTurnsToWin\":9.067962},\"The Watcher\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":6,\"wins\":2,\"loss\":4,\"averageDamageTaken\":34.089172,\"averageDamageDealt\":46.68964,\"averageTurnsToWin\":8.926318},\"The Defect\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":12,\"wins\":9,\"loss\":3,\"averageDamageTaken\":29.26016,\"averageDamageDealt\":20.47667,\"averageTurnsToWin\":7.1529613},\"The Ironclad\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":2,\"wins\":1,\"loss\":1,\"averageDamageTaken\":40.808006,\"averageDamageDealt\":40.9384,\"averageTurnsToWin\":5.1079755}},\"Small Slimes\":{\"The Silent\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":1,\"wins\":0,\"loss\":1,\"averageDamageTaken\":20.245722,\"averageDamageDealt\":46.489532,\"averageTurnsToWin\":4.9554553},\"The Watcher\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":10,\"wins\":6,\"loss\":4,\"averageDamageTaken\":18.777172,\"averageDamageDealt\":44.07,\"averageTurnsToWin\":8.005833},\"The Defect\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":1,\"wins\":1,\"loss\":0,\"averageDamageTaken\":45.131794,\"averageDamageDealt\":48.61703,\"averageTurnsToWin\":8.6862335},\"The Ironclad\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":8,\"wins\":7,\"loss\":1,\"averageDamageTaken\":14.210865,\"averageDamageDealt\":42.4738,\"averageTurnsToWin\":5.367388}}}}";
+            CombatStats combatStats = gson.fromJson(sourceStats, CombatStats.class);
+            statsStore.stats = combatStats;//StatsUtils.generateTestStats();
+        } catch (Exception e) {
+            logger.error("Exception trying to deserialize CombatStats", e);
+        } finally {
+            if (statsStore.stats == null) {
+                logger.info("Unable to load CombatStats. Generating dummy stats.");
+                statsStore.stats = StatsUtils.generateTestStats();
+            }
+        }
     }
     
     // =============== / POST-INITIALIZE/ =================

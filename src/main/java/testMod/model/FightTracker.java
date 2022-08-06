@@ -1,7 +1,8 @@
-package testMod;
+package testMod.model;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import testMod.DefaultMod;
 
 
 public class FightTracker {

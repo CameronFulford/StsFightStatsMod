@@ -1,10 +1,6 @@
 package testMod.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import testMod.FightTracker;
+import lombok.*;
 
 /**
  * This class models the stats for a combat vs a single enemy. It contains the summary of statistics from combats for the
@@ -14,6 +10,7 @@ import testMod.FightTracker;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class EnemyCombatStats {
     public String combatEnemyKey;
     public int numCombats;
