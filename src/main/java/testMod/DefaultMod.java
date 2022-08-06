@@ -16,6 +16,7 @@ import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.DamageInfo;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -40,6 +41,8 @@ import testMod.relics.BottledPlaceholderRelic;
 import testMod.relics.DefaultClickableRelic;
 import testMod.relics.PlaceholderRelic;
 import testMod.relics.PlaceholderRelic2;
+import testMod.stats.StatsStore;
+import testMod.stats.StatsUtils;
 import testMod.util.IDCheckDontTouchPls;
 import testMod.util.TextureLoader;
 import testMod.variables.DefaultCustomVariable;
@@ -158,7 +161,9 @@ public class DefaultMod extends OnPlayerDamagedHook implements
 
     // Track the details of the current fight.
     public static FightTracker fightTracker = new FightTracker();
-    public static EnemyCombatStats enemyCombatStats;
+    public static StatsStore statsStore = new StatsStore();
+    public static EnemyCombatStats battleStats;
+    public static boolean inBattle = false;
 
     // =============== MAKE IMAGE PATHS =================
     
@@ -383,6 +388,10 @@ public class DefaultMod extends OnPlayerDamagedHook implements
 
         // =============== /EVENTS/ =================
         logger.info("Done loading badge Image and mod options");
+
+
+        // TODO: figure out how to properly load stats from a file.
+        statsStore.stats = StatsUtils.generateTestStats();
     }
     
     // =============== / POST-INITIALIZE/ =================
@@ -550,13 +559,20 @@ public class DefaultMod extends OnPlayerDamagedHook implements
 
     @Override
     public void receiveOnBattleStart(AbstractRoom abstractRoom) {
+        inBattle = true;
         logger.info("lastCombatMetricKey: " + CardCrawlGame.dungeon.lastCombatMetricKey);
         logger.info("MonsterRoom monsters: " + abstractRoom.monsters.monsters);
 //        CardCrawlGame.characterManager.getCharacter().inspectHb.
         fightTracker = new FightTracker();
         fightTracker.combatKey = CardCrawlGame.dungeon.lastCombatMetricKey;
 
-
+        // Load stats for this encounter
+        battleStats = statsStore.stats.getAggregateCombatStats(fightTracker.combatKey);
+        if (battleStats == null) {
+            logger.info("No stats for current enemy. Generating dummy stats.");
+            battleStats = StatsUtils.generateTestEnemyStats(fightTracker.combatKey);
+            statsStore.stats.addCombatStats(fightTracker.combatKey, AbstractDungeon.player.chosenClass.name(), battleStats);
+        }
     }
 
     @Override
@@ -571,17 +587,24 @@ public class DefaultMod extends OnPlayerDamagedHook implements
         //  and ascension number are rendered.
     }
 
-    private static boolean shouldRenderStats() {
+    private boolean shouldRenderStats() {
         // TODO: this seems like an overly complicated way to tell if the player is currently in a combat. Is there a better way?
-        return CardCrawlGame.isInARun() && AbstractDungeon.isPlayerInDungeon() && (AbstractDungeon.getCurrMapNode() != null)
-                && (AbstractDungeon.getCurrRoom() != null) && (AbstractDungeon.getCurrRoom() instanceof MonsterRoom);
+        return inBattle;
+//        CardCrawlGame.isInARun() && AbstractDungeon.isPlayerInDungeon() && (AbstractDungeon.getCurrMapNode() != null)
+//                && (AbstractDungeon.getCurrRoom() != null) && (AbstractDungeon.getCurrRoom() instanceof MonsterRoom);
                 //&& ((AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT) || (AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMPLETE));
     }
     private static void renderStats(SpriteBatch spriteBatch) {
+        String cummulativeStats = String.format("%s\n\nCombats (wins/losses/total): %d/%d/%d\nAvg damage taken: %.2f\n" +
+                "Avg damage dealt: %.2f\nAverage # of turns to win: %.2f", battleStats.combatEnemyKey,
+                battleStats.wins, battleStats.loss, battleStats.numCombats, battleStats.averageDamageTaken,
+                battleStats.averageDamageDealt, battleStats.averageTurnsToWin);
+        FontHelper.renderFont(spriteBatch, FontHelper.tipBodyFont, cummulativeStats, 10, 900, Color.WHITE);
+
         // TODO: can render multi-line text with different fonts by offsetting text height. See TipHelper#getPowerTipHeight
         String currentFightStats = String.format("%s\n\nTurns: %d\nDamage taken: %d\nDamage dealt: %d", fightTracker.combatKey,
                 fightTracker.numTurns, fightTracker.damageTaken, fightTracker.damageDealt);
-        FontHelper.renderFont(spriteBatch, FontHelper.tipBodyFont, currentFightStats, 10, 900, Color.WHITE);
+        FontHelper.renderFont(spriteBatch, FontHelper.tipBodyFont, currentFightStats, 10, 700, Color.WHITE);
     }
 
     @Override
@@ -617,6 +640,7 @@ public class DefaultMod extends OnPlayerDamagedHook implements
 
     @Override
     public void receivePostBattle(AbstractRoom abstractRoom) {
+//        inBattle = false;
         logger.info("isBattleOver: " + abstractRoom.isBattleOver);
         logger.info("damageReceivedThisCombat: " + GameActionManager.damageReceivedThisCombat);
         logger.info("damageDealtThisCombat: ?");
