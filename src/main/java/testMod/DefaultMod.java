@@ -393,7 +393,7 @@ public class DefaultMod extends OnPlayerDamagedHook implements
 //            Gson gson = new Gson();
 //            String sourceStats = "{\"enemyCombatStatsMap\":{\"Cultist\":{\"The Silent\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":4,\"wins\":0,\"loss\":4,\"averageDamageTaken\":39.8706,\"averageDamageDealt\":14.15554,\"averageTurnsToWin\":1.9362346},\"The Watcher\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":1,\"wins\":0,\"loss\":1,\"averageDamageTaken\":13.711613,\"averageDamageDealt\":13.286872,\"averageTurnsToWin\":10.84672},\"The Defect\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":9,\"wins\":5,\"loss\":4,\"averageDamageTaken\":28.311348,\"averageDamageDealt\":12.114415,\"averageTurnsToWin\":6.437801},\"The Ironclad\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":2,\"wins\":0,\"loss\":2,\"averageDamageTaken\":16.327467,\"averageDamageDealt\":33.701447,\"averageTurnsToWin\":3.3450832}},\"2 Louse\":{\"The Silent\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":1,\"wins\":1,\"loss\":0,\"averageDamageTaken\":20.29732,\"averageDamageDealt\":36.324097,\"averageTurnsToWin\":4.158781},\"The Watcher\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":10,\"wins\":9,\"loss\":1,\"averageDamageTaken\":38.494812,\"averageDamageDealt\":42.39269,\"averageTurnsToWin\":10.586774},\"The Defect\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":6,\"wins\":5,\"loss\":1,\"averageDamageTaken\":38.53638,\"averageDamageDealt\":11.857495,\"averageTurnsToWin\":5.7880707},\"The Ironclad\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":8,\"wins\":6,\"loss\":2,\"averageDamageTaken\":49.592567,\"averageDamageDealt\":30.074987,\"averageTurnsToWin\":8.314305}},\"Jaw Worm\":{\"The Silent\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":8,\"wins\":5,\"loss\":3,\"averageDamageTaken\":17.060352,\"averageDamageDealt\":28.809082,\"averageTurnsToWin\":9.067962},\"The Watcher\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":6,\"wins\":2,\"loss\":4,\"averageDamageTaken\":34.089172,\"averageDamageDealt\":46.68964,\"averageTurnsToWin\":8.926318},\"The Defect\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":12,\"wins\":9,\"loss\":3,\"averageDamageTaken\":29.26016,\"averageDamageDealt\":20.47667,\"averageTurnsToWin\":7.1529613},\"The Ironclad\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":2,\"wins\":1,\"loss\":1,\"averageDamageTaken\":40.808006,\"averageDamageDealt\":40.9384,\"averageTurnsToWin\":5.1079755}},\"Small Slimes\":{\"The Silent\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":1,\"wins\":0,\"loss\":1,\"averageDamageTaken\":20.245722,\"averageDamageDealt\":46.489532,\"averageTurnsToWin\":4.9554553},\"The Watcher\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":10,\"wins\":6,\"loss\":4,\"averageDamageTaken\":18.777172,\"averageDamageDealt\":44.07,\"averageTurnsToWin\":8.005833},\"The Defect\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":1,\"wins\":1,\"loss\":0,\"averageDamageTaken\":45.131794,\"averageDamageDealt\":48.61703,\"averageTurnsToWin\":8.6862335},\"The Ironclad\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":8,\"wins\":7,\"loss\":1,\"averageDamageTaken\":14.210865,\"averageDamageDealt\":42.4738,\"averageTurnsToWin\":5.367388}}}}";
 //            CombatStats combatStats = gson.fromJson(sourceStats, CombatStats.class);
-            statsStore.stats = StatsUtils.generateTestStats();
+            statsStore.stats = new CombatStats(); // StatsUtils.generateTestStats();
         } catch (Exception e) {
             logger.error("Exception trying to deserialize CombatStats", e);
         } finally {
@@ -601,11 +601,20 @@ public class DefaultMod extends OnPlayerDamagedHook implements
                 //&& ((AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT) || (AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMPLETE));
     }
     private static void renderStats(SpriteBatch spriteBatch) {
-        String cummulativeStats = String.format("%s\n\nCombats (wins/losses/total): %d/%d/%d\nAvg damage taken: %.2f\n" +
-                "Avg damage dealt: %.2f\nAverage # of turns to win: %.2f", battleStats.combatEnemyKey,
-                battleStats.wins, battleStats.loss, battleStats.numCombats, battleStats.averageDamageTaken,
-                battleStats.averageDamageDealt, battleStats.averageTurnsToWin);
-        FontHelper.renderFont(spriteBatch, FontHelper.tipBodyFont, cummulativeStats, 10, 900, Color.WHITE);
+        final String aggregateStatsFormatString = "%s\n\nCombats (wins/losses/total): %d/%d/%d\nAvg damage taken: %.1f\n" +
+                "Avg damage dealt: %.1f\nAverage # of turns to win: %.1f";
+        String aggregateStatsDisplay;
+        if (battleStats != null) {
+            aggregateStatsDisplay = String.format(aggregateStatsFormatString, battleStats.combatEnemyKey,
+                    battleStats.wins, battleStats.loss, battleStats.numCombats, battleStats.averageDamageTaken,
+                    battleStats.averageDamageDealt, battleStats.averageTurnsToWin);
+        } else {
+            final int defaultIntValue = 0;
+            final float defaultFloatValue = 0f;
+            aggregateStatsDisplay = String.format(aggregateStatsFormatString, fightTracker.combatKey, defaultIntValue,
+                    defaultIntValue, defaultIntValue, defaultFloatValue, defaultFloatValue, defaultFloatValue);
+        }
+        FontHelper.renderFont(spriteBatch, FontHelper.tipBodyFont, aggregateStatsDisplay, 10, 900, Color.WHITE);
 
         // TODO: can render multi-line text with different fonts by offsetting text height. See TipHelper#getPowerTipHeight
         String currentFightStats = String.format("%s\n\nTurns: %d\nDamage taken: %d\nDamage dealt: %d", fightTracker.combatKey,
@@ -641,12 +650,10 @@ public class DefaultMod extends OnPlayerDamagedHook implements
         logger.info("Incrementing turns: " + fightTracker.numTurns);
 
         logger.info("Settings.scale: " + Settings.scale);
-//        GameActionManager
     }
 
     @Override
     public void receivePostBattle(AbstractRoom abstractRoom) {
-//        inBattle = false;
         logger.info("isBattleOver: " + abstractRoom.isBattleOver);
         logger.info("damageReceivedThisCombat: " + GameActionManager.damageReceivedThisCombat);
         logger.info("damageDealtThisCombat: ?");
@@ -680,12 +687,10 @@ public class DefaultMod extends OnPlayerDamagedHook implements
     public void refreshBattleStats(String enemy) {
         battleStats = statsStore.stats.getAggregateCombatStats(enemy);
         if (battleStats == null) {
-            logger.info("No stats for current enemy. Generating dummy stats.");
-            // TODO: handle no existing stats instead of generating dummy data
-            battleStats = StatsUtils.generateTestEnemyStats(fightTracker.combatKey);
-            statsStore.stats.addCombatStats(fightTracker.combatKey, AbstractDungeon.player.getClass().getSimpleName(), battleStats);
+            logger.info("No stats for current enemy.");
+        } else {
+            logger.info("Refreshed battleStats: " + battleStats);
         }
-        logger.info("Refreshed battleStats: " + battleStats);
     }
 
     @Override
