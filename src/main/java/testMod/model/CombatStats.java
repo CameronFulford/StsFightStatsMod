@@ -45,6 +45,13 @@ public class CombatStats {
         return null;
     }
 
+    public EnemyCombatStats getEnemyCombatStats(final String enemy, final String character) {
+        if (enemyCombatStatsMap.containsKey(enemy)) {
+            return enemyCombatStatsMap.get(enemy).get(character);
+        }
+        return null;
+    }
+
     static EnemyCombatStats addStatsToAggregate(EnemyCombatStats aggregate, EnemyCombatStats stats) {
         if (aggregate == null) {
             return stats.toBuilder().build();

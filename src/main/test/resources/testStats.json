@@ -1,155 +1,155 @@
 {
   "enemyCombatStatsMap": {
     "Cultist": {
-      "The Silent": {
+      "TheSilent": {
         "combatEnemyKey": "Cultist",
-        "numCombats": 4,
-        "wins": 0,
-        "loss": 4,
-        "averageDamageTaken": 39.8706,
-        "averageDamageDealt": 14.15554,
-        "averageTurnsToWin": 1.9362346
+        "numCombats": 7,
+        "wins": 7,
+        "loss": 0,
+        "averageDamageTaken": 28.730595,
+        "averageDamageDealt": 43.426414,
+        "averageTurnsToWin": 8.965502
       },
-      "The Watcher": {
-        "combatEnemyKey": "Cultist",
-        "numCombats": 1,
-        "wins": 0,
-        "loss": 1,
-        "averageDamageTaken": 13.711613,
-        "averageDamageDealt": 13.286872,
-        "averageTurnsToWin": 10.84672
-      },
-      "The Defect": {
+      "Ironclad": {
         "combatEnemyKey": "Cultist",
         "numCombats": 9,
-        "wins": 5,
-        "loss": 4,
-        "averageDamageTaken": 28.311348,
-        "averageDamageDealt": 12.114415,
-        "averageTurnsToWin": 6.437801
+        "wins": 6,
+        "loss": 3,
+        "averageDamageTaken": 12.996669,
+        "averageDamageDealt": 30.731394,
+        "averageTurnsToWin": 1.4747987
       },
-      "The Ironclad": {
+      "Defect": {
         "combatEnemyKey": "Cultist",
-        "numCombats": 2,
-        "wins": 0,
-        "loss": 2,
-        "averageDamageTaken": 16.327467,
-        "averageDamageDealt": 33.701447,
-        "averageTurnsToWin": 3.3450832
+        "numCombats": 10,
+        "wins": 9,
+        "loss": 1,
+        "averageDamageTaken": 15.029957,
+        "averageDamageDealt": 18.137115,
+        "averageTurnsToWin": 5.64694
+      },
+      "Watcher": {
+        "combatEnemyKey": "Cultist",
+        "numCombats": 10,
+        "wins": 9,
+        "loss": 1,
+        "averageDamageTaken": 31.46228,
+        "averageDamageDealt": 29.576378,
+        "averageTurnsToWin": 6.2510543
       }
     },
     "2 Louse": {
-      "The Silent": {
+      "TheSilent": {
         "combatEnemyKey": "2 Louse",
-        "numCombats": 1,
-        "wins": 1,
-        "loss": 0,
-        "averageDamageTaken": 20.29732,
-        "averageDamageDealt": 36.324097,
-        "averageTurnsToWin": 4.158781
-      },
-      "The Watcher": {
-        "combatEnemyKey": "2 Louse",
-        "numCombats": 10,
-        "wins": 9,
-        "loss": 1,
-        "averageDamageTaken": 38.494812,
-        "averageDamageDealt": 42.39269,
-        "averageTurnsToWin": 10.586774
-      },
-      "The Defect": {
-        "combatEnemyKey": "2 Louse",
-        "numCombats": 6,
-        "wins": 5,
-        "loss": 1,
-        "averageDamageTaken": 38.53638,
-        "averageDamageDealt": 11.857495,
-        "averageTurnsToWin": 5.7880707
-      },
-      "The Ironclad": {
-        "combatEnemyKey": "2 Louse",
-        "numCombats": 8,
-        "wins": 6,
+        "numCombats": 2,
+        "wins": 0,
         "loss": 2,
-        "averageDamageTaken": 49.592567,
-        "averageDamageDealt": 30.074987,
-        "averageTurnsToWin": 8.314305
+        "averageDamageTaken": 30.44064,
+        "averageDamageDealt": 25.788803,
+        "averageTurnsToWin": 9.68075
+      },
+      "Ironclad": {
+        "combatEnemyKey": "2 Louse",
+        "numCombats": 4,
+        "wins": 0,
+        "loss": 4,
+        "averageDamageTaken": 18.38599,
+        "averageDamageDealt": 17.244051,
+        "averageTurnsToWin": 6.025375
+      },
+      "Defect": {
+        "combatEnemyKey": "2 Louse",
+        "numCombats": 5,
+        "wins": 4,
+        "loss": 1,
+        "averageDamageTaken": 29.351849,
+        "averageDamageDealt": 15.238096,
+        "averageTurnsToWin": 4.1759224
+      },
+      "Watcher": {
+        "combatEnemyKey": "2 Louse",
+        "numCombats": 3,
+        "wins": 2,
+        "loss": 1,
+        "averageDamageTaken": 15.489521,
+        "averageDamageDealt": 21.712383,
+        "averageTurnsToWin": 5.972496
       }
     },
     "Jaw Worm": {
-      "The Silent": {
+      "TheSilent": {
         "combatEnemyKey": "Jaw Worm",
-        "numCombats": 8,
-        "wins": 5,
+        "numCombats": 4,
+        "wins": 1,
         "loss": 3,
-        "averageDamageTaken": 17.060352,
-        "averageDamageDealt": 28.809082,
-        "averageTurnsToWin": 9.067962
+        "averageDamageTaken": 24.526535,
+        "averageDamageDealt": 11.553597,
+        "averageTurnsToWin": 7.7626076
       },
-      "The Watcher": {
+      "Ironclad": {
+        "combatEnemyKey": "Jaw Worm",
+        "numCombats": 11,
+        "wins": 9,
+        "loss": 2,
+        "averageDamageTaken": 16.848001,
+        "averageDamageDealt": 43.46578,
+        "averageTurnsToWin": 9.011274
+      },
+      "Defect": {
         "combatEnemyKey": "Jaw Worm",
         "numCombats": 6,
-        "wins": 2,
-        "loss": 4,
-        "averageDamageTaken": 34.089172,
-        "averageDamageDealt": 46.68964,
-        "averageTurnsToWin": 8.926318
-      },
-      "The Defect": {
-        "combatEnemyKey": "Jaw Worm",
-        "numCombats": 12,
-        "wins": 9,
-        "loss": 3,
-        "averageDamageTaken": 29.26016,
-        "averageDamageDealt": 20.47667,
-        "averageTurnsToWin": 7.1529613
-      },
-      "The Ironclad": {
-        "combatEnemyKey": "Jaw Worm",
-        "numCombats": 2,
-        "wins": 1,
+        "wins": 5,
         "loss": 1,
-        "averageDamageTaken": 40.808006,
-        "averageDamageDealt": 40.9384,
-        "averageTurnsToWin": 5.1079755
+        "averageDamageTaken": 11.909349,
+        "averageDamageDealt": 33.267654,
+        "averageTurnsToWin": 10.52095
+      },
+      "Watcher": {
+        "combatEnemyKey": "Jaw Worm",
+        "numCombats": 11,
+        "wins": 8,
+        "loss": 3,
+        "averageDamageTaken": 19.665926,
+        "averageDamageDealt": 17.523832,
+        "averageTurnsToWin": 3.1530886
       }
     },
     "Small Slimes": {
-      "The Silent": {
+      "TheSilent": {
         "combatEnemyKey": "Small Slimes",
-        "numCombats": 1,
-        "wins": 0,
-        "loss": 1,
-        "averageDamageTaken": 20.245722,
-        "averageDamageDealt": 46.489532,
-        "averageTurnsToWin": 4.9554553
+        "numCombats": 3,
+        "wins": 1,
+        "loss": 2,
+        "averageDamageTaken": 44.368446,
+        "averageDamageDealt": 42.556362,
+        "averageTurnsToWin": 4.3387947
       },
-      "The Watcher": {
+      "Ironclad": {
         "combatEnemyKey": "Small Slimes",
         "numCombats": 10,
-        "wins": 6,
-        "loss": 4,
-        "averageDamageTaken": 18.777172,
-        "averageDamageDealt": 44.07,
-        "averageTurnsToWin": 8.005833
+        "wins": 8,
+        "loss": 2,
+        "averageDamageTaken": 25.696255,
+        "averageDamageDealt": 46.31268,
+        "averageTurnsToWin": 9.146822
       },
-      "The Defect": {
-        "combatEnemyKey": "Small Slimes",
-        "numCombats": 1,
-        "wins": 1,
-        "loss": 0,
-        "averageDamageTaken": 45.131794,
-        "averageDamageDealt": 48.61703,
-        "averageTurnsToWin": 8.6862335
-      },
-      "The Ironclad": {
+      "Defect": {
         "combatEnemyKey": "Small Slimes",
         "numCombats": 8,
-        "wins": 7,
-        "loss": 1,
-        "averageDamageTaken": 14.210865,
-        "averageDamageDealt": 42.4738,
-        "averageTurnsToWin": 5.367388
+        "wins": 5,
+        "loss": 3,
+        "averageDamageTaken": 37.96131,
+        "averageDamageDealt": 20.160427,
+        "averageTurnsToWin": 5.3983026
+      },
+      "Watcher": {
+        "combatEnemyKey": "Small Slimes",
+        "numCombats": 8,
+        "wins": 6,
+        "loss": 2,
+        "averageDamageTaken": 47.155067,
+        "averageDamageDealt": 14.972134,
+        "averageTurnsToWin": 3.5309067
       }
     }
   }

@@ -1,6 +1,8 @@
 package testMod.model;
 
 import lombok.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class models the stats for a combat vs a single enemy. It contains the summary of statistics from combats for the
@@ -12,6 +14,7 @@ import lombok.*;
 @ToString
 @EqualsAndHashCode
 public class EnemyCombatStats {
+    private static final Logger logger = LogManager.getLogger(EnemyCombatStats.class.getName());
     public String combatEnemyKey;
     public int numCombats;
     public int wins;
@@ -21,7 +24,9 @@ public class EnemyCombatStats {
     public float averageTurnsToWin;
 
     public void addFightStats(FightTracker fightTracker) {
+        logger.info("Adding fightTracker stats to EnemyCombatStats: " + this);
         if (fightTracker.result == FightTracker.FightResult.UNKNOWN) {
+            logger.warn("Unable to add stats, invalid fight result: " + fightTracker.result);
             return;
         }
 
@@ -35,6 +40,20 @@ public class EnemyCombatStats {
         averageDamageDealt = computeNewAverage(averageDamageDealt, numCombats, fightTracker.damageDealt);
         averageDamageTaken = computeNewAverage(averageDamageTaken, numCombats, fightTracker.damageTaken);
         numCombats++;
+
+        logger.info("Updated EnemyCombatStats: " + this);
+    }
+
+    public static EnemyCombatStats fromFightTracker(FightTracker fightTracker) {
+        return EnemyCombatStats.builder()
+                .combatEnemyKey(fightTracker.combatKey)
+                .numCombats(1)
+                .wins((fightTracker.result == FightTracker.FightResult.WIN) ? 1 : 0)
+                .loss((fightTracker.result == FightTracker.FightResult.LOSS) ? 1 : 0)
+                .averageTurnsToWin(fightTracker.numTurns)
+                .averageDamageTaken(fightTracker.damageTaken)
+                .averageDamageDealt(fightTracker.damageDealt)
+                .build();
     }
 
     /**
