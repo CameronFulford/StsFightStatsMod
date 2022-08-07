@@ -402,8 +402,7 @@ public class DefaultMod extends OnPlayerDamagedHook implements
                 statsStore.stats = StatsUtils.generateTestStats();
             }
         }
-        Gson gson = new Gson();
-        logger.info("Loaded CombatStats: " + gson.toJson(statsStore.stats));
+        logger.info("Loaded CombatStats: " + statsStore.stats);
     }
     
     // =============== / POST-INITIALIZE/ =================
@@ -653,11 +652,20 @@ public class DefaultMod extends OnPlayerDamagedHook implements
         logger.info("damageDealtThisCombat: ?");
 
         // TODO: set win/loss/smoked result
+        if (abstractRoom.isBattleOver) {
+            if (abstractRoom.smoked) {
+                fightTracker.result = FightTracker.FightResult.SMOKED;
+            } else if (AbstractDungeon.player.isDead) {
+                fightTracker.result = FightTracker.FightResult.LOSS;
+            } else {
+                fightTracker.result = FightTracker.FightResult.WIN;
+            }
+        }
 
         // Add current combat stats to the stats store
         String character = AbstractDungeon.player.getClass().getSimpleName();
         EnemyCombatStats enemyCombatStats = statsStore.stats.getEnemyCombatStats(fightTracker.combatKey, character);
-        logger.info("Saving fight stats to CombatStats for " + character + "/" + fightTracker.combatKey);
+        logger.info("Saving fight stats to CombatStats for " + character + "/" + fightTracker.combatKey + ": " + fightTracker);
         if (enemyCombatStats == null) {
             logger.info("Did not find CombatStats for character.");
             statsStore.stats.addCombatStats(fightTracker.combatKey, character, EnemyCombatStats.fromFightTracker(fightTracker));

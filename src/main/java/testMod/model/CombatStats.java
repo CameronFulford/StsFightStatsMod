@@ -1,12 +1,14 @@
 package testMod.model;
 
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@ToString
 @EqualsAndHashCode
 public class CombatStats {
     static Logger logger = LogManager.getLogger(CombatStats.class.getName());

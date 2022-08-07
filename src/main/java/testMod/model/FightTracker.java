@@ -1,10 +1,11 @@
 package testMod.model;
 
+import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import testMod.DefaultMod;
 
-
+@ToString
 public class FightTracker {
     public static final Logger logger = LogManager.getLogger(DefaultMod.class.getName());
 
