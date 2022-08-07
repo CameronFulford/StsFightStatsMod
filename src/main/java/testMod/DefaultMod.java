@@ -1,6 +1,7 @@
 package testMod;
 
 import basemod.*;
+import basemod.abstracts.CustomSavableRaw;
 import basemod.eventUtil.AddEventParams;
 import basemod.helpers.RelicType;
 import basemod.interfaces.*;
@@ -14,6 +15,8 @@ import com.evacipated.cardcrawl.mod.stslib.Keyword;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.DamageInfo;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
@@ -96,7 +99,8 @@ public class DefaultMod extends OnPlayerDamagedHook implements
         PostUpdateSubscriber,
         PreUpdateSubscriber,
         PostBattleSubscriber,
-        RenderSubscriber {
+        RenderSubscriber,
+        CustomSavableRaw {
     // Make sure to implement the subscribers *you* are using (read basemod wiki). Editing cards? EditCardsSubscriber.
     // Making relics? EditRelicsSubscriber. etc., etc., for a full list and how to make your own, visit the basemod wiki.
     public static final Logger logger = LogManager.getLogger(DefaultMod.class.getName());
@@ -390,6 +394,7 @@ public class DefaultMod extends OnPlayerDamagedHook implements
 
         // TODO: figure out how to properly load stats from a file.
         try {
+            BaseMod.addSaveField(CombatStats.FIGHT_STATS_MOD_JSON_KEY, this);
 //            Gson gson = new Gson();
 //            String sourceStats = "{\"enemyCombatStatsMap\":{\"Cultist\":{\"The Silent\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":4,\"wins\":0,\"loss\":4,\"averageDamageTaken\":39.8706,\"averageDamageDealt\":14.15554,\"averageTurnsToWin\":1.9362346},\"The Watcher\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":1,\"wins\":0,\"loss\":1,\"averageDamageTaken\":13.711613,\"averageDamageDealt\":13.286872,\"averageTurnsToWin\":10.84672},\"The Defect\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":9,\"wins\":5,\"loss\":4,\"averageDamageTaken\":28.311348,\"averageDamageDealt\":12.114415,\"averageTurnsToWin\":6.437801},\"The Ironclad\":{\"combatEnemyKey\":\"Cultist\",\"numCombats\":2,\"wins\":0,\"loss\":2,\"averageDamageTaken\":16.327467,\"averageDamageDealt\":33.701447,\"averageTurnsToWin\":3.3450832}},\"2 Louse\":{\"The Silent\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":1,\"wins\":1,\"loss\":0,\"averageDamageTaken\":20.29732,\"averageDamageDealt\":36.324097,\"averageTurnsToWin\":4.158781},\"The Watcher\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":10,\"wins\":9,\"loss\":1,\"averageDamageTaken\":38.494812,\"averageDamageDealt\":42.39269,\"averageTurnsToWin\":10.586774},\"The Defect\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":6,\"wins\":5,\"loss\":1,\"averageDamageTaken\":38.53638,\"averageDamageDealt\":11.857495,\"averageTurnsToWin\":5.7880707},\"The Ironclad\":{\"combatEnemyKey\":\"2 Louse\",\"numCombats\":8,\"wins\":6,\"loss\":2,\"averageDamageTaken\":49.592567,\"averageDamageDealt\":30.074987,\"averageTurnsToWin\":8.314305}},\"Jaw Worm\":{\"The Silent\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":8,\"wins\":5,\"loss\":3,\"averageDamageTaken\":17.060352,\"averageDamageDealt\":28.809082,\"averageTurnsToWin\":9.067962},\"The Watcher\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":6,\"wins\":2,\"loss\":4,\"averageDamageTaken\":34.089172,\"averageDamageDealt\":46.68964,\"averageTurnsToWin\":8.926318},\"The Defect\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":12,\"wins\":9,\"loss\":3,\"averageDamageTaken\":29.26016,\"averageDamageDealt\":20.47667,\"averageTurnsToWin\":7.1529613},\"The Ironclad\":{\"combatEnemyKey\":\"Jaw Worm\",\"numCombats\":2,\"wins\":1,\"loss\":1,\"averageDamageTaken\":40.808006,\"averageDamageDealt\":40.9384,\"averageTurnsToWin\":5.1079755}},\"Small Slimes\":{\"The Silent\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":1,\"wins\":0,\"loss\":1,\"averageDamageTaken\":20.245722,\"averageDamageDealt\":46.489532,\"averageTurnsToWin\":4.9554553},\"The Watcher\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":10,\"wins\":6,\"loss\":4,\"averageDamageTaken\":18.777172,\"averageDamageDealt\":44.07,\"averageTurnsToWin\":8.005833},\"The Defect\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":1,\"wins\":1,\"loss\":0,\"averageDamageTaken\":45.131794,\"averageDamageDealt\":48.61703,\"averageTurnsToWin\":8.6862335},\"The Ironclad\":{\"combatEnemyKey\":\"Small Slimes\",\"numCombats\":8,\"wins\":7,\"loss\":1,\"averageDamageTaken\":14.210865,\"averageDamageDealt\":42.4738,\"averageTurnsToWin\":5.367388}}}}";
 //            CombatStats combatStats = gson.fromJson(sourceStats, CombatStats.class);
@@ -700,5 +705,25 @@ public class DefaultMod extends OnPlayerDamagedHook implements
 //
 //            TipHelper.renderGenericTip(500, 250, "Tip header", "Tip body.");
         }
+    }
+
+    @Override
+    public JsonElement onSaveRaw() {
+        logger.info("Saving CombatStats to json.");
+        Gson gson = new Gson();
+        return gson.toJsonTree(statsStore.stats);
+    }
+
+    @Override
+    public void onLoadRaw(JsonElement jsonElement) {
+        if (jsonElement != null) {
+            logger.info("Loading CombatStats from json.");
+            Gson gson = new Gson();
+            statsStore.stats = gson.fromJson(jsonElement, CombatStats.class);
+            logger.info("Loaded CombatStats: " + statsStore.stats);
+        } else {
+            logger.info("No CombatStats JsonElement to load.");
+        }
+
     }
 }

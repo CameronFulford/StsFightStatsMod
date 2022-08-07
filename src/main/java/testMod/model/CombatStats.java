@@ -11,7 +11,8 @@ import java.util.Map;
 @ToString
 @EqualsAndHashCode
 public class CombatStats {
-    static Logger logger = LogManager.getLogger(CombatStats.class.getName());
+    private static Logger logger = LogManager.getLogger(CombatStats.class.getName());
+    public static final String FIGHT_STATS_MOD_JSON_KEY = "fight_stats_mod";
 
     // A map of enemy key to a map of combat enemy stats per character.
     public Map<String, Map<String, EnemyCombatStats>> enemyCombatStatsMap = new HashMap<>();
