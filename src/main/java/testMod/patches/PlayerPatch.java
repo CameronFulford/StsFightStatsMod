@@ -7,6 +7,7 @@ import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import testMod.DefaultMod;
+import testMod.model.FightTracker;
 
 @SpirePatch(
         clz = AbstractPlayer.class,
@@ -20,5 +21,11 @@ public class PlayerPatch {
                 AbstractDungeon.player.isDead,
                 AbstractDungeon.player.lastDamageTaken));
         DefaultMod.fightTracker.damageTaken += AbstractDungeon.player.lastDamageTaken;
+
+        // Special handling if the player has died
+        if (AbstractDungeon.player.isDead) {
+            DefaultMod.fightTracker.result = FightTracker.FightResult.LOSS;
+            DefaultMod.writeFightStatsToStore();
+        }
     }
 }

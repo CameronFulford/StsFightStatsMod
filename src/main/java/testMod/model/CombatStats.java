@@ -72,6 +72,10 @@ public class CombatStats {
     }
 
     private static float combineAverageValues(float average1, int n1, float average2, int n2) {
+        if ((n1 + n2) == 0) {
+            // Avoid NaN division by 0
+            return 0;
+        }
         return average1*(n1*1f)/(n1 + n2) + average2*(n2*1f)/(n1+n2);
     }
 }

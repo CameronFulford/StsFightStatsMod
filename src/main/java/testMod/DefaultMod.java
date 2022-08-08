@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.mod.stslib.Keyword;
+import com.evacipated.cardcrawl.mod.stslib.patches.bothInterfaces.OnPlayerDeathPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
@@ -96,6 +97,7 @@ public class DefaultMod extends OnPlayerDamagedHook implements
         OnStartBattleSubscriber,
         OnPlayerTurnStartSubscriber,
         OnPlayerDamagedSubscriber,
+        PostDeathSubscriber,
         PostUpdateSubscriber,
         PreUpdateSubscriber,
         PostBattleSubscriber,
@@ -663,21 +665,25 @@ public class DefaultMod extends OnPlayerDamagedHook implements
         logger.info("damageReceivedThisCombat: " + GameActionManager.damageReceivedThisCombat);
         logger.info("damageDealtThisCombat: ?");
 
-        // TODO: set win/loss/smoked result
         if (abstractRoom.isBattleOver) {
             if (abstractRoom.smoked) {
                 fightTracker.result = FightTracker.FightResult.SMOKED;
             } else if (AbstractDungeon.player.isDead) {
+                // Not sure if this ever triggers.
                 fightTracker.result = FightTracker.FightResult.LOSS;
             } else {
                 fightTracker.result = FightTracker.FightResult.WIN;
             }
         }
 
+        writeFightStatsToStore();
+    }
+
+    public static void writeFightStatsToStore() {
         // Add current combat stats to the stats store
         String character = AbstractDungeon.player.getClass().getSimpleName();
         EnemyCombatStats enemyCombatStats = statsStore.stats.getEnemyCombatStats(fightTracker.combatKey, character);
-        logger.info("Saving fight stats to CombatStats for " + character + "/" + fightTracker.combatKey + ": " + fightTracker);
+        logger.info("Storing fight stats to CombatStats for " + character + "/" + fightTracker.combatKey + ": " + fightTracker);
         if (enemyCombatStats == null) {
             logger.info("Did not find CombatStats for character.");
             statsStore.stats.addCombatStats(fightTracker.combatKey, character, EnemyCombatStats.fromFightTracker(fightTracker));
@@ -689,7 +695,7 @@ public class DefaultMod extends OnPlayerDamagedHook implements
         refreshBattleStats(fightTracker.combatKey);
     }
 
-    public void refreshBattleStats(String enemy) {
+    public static void refreshBattleStats(String enemy) {
         battleStats = statsStore.stats.getAggregateCombatStats(enemy);
         if (battleStats == null) {
             logger.info("No stats for current enemy.");
@@ -725,5 +731,12 @@ public class DefaultMod extends OnPlayerDamagedHook implements
             logger.info("No CombatStats JsonElement to load.");
         }
 
+    }
+
+    @Override
+    public void receivePostDeath() {
+        logger.info("receivePostDeath. player last damage taken: " + AbstractDungeon.player.lastDamageTaken);
+//        fightTracker.result = FightTracker.FightResult.LOSS;
+//        writeFightStatsToStore();
     }
 }

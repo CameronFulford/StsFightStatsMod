@@ -50,7 +50,7 @@ public class EnemyCombatStats {
                 .numCombats(1)
                 .wins((fightTracker.result == FightTracker.FightResult.WIN) ? 1 : 0)
                 .loss((fightTracker.result == FightTracker.FightResult.LOSS) ? 1 : 0)
-                .averageTurnsToWin(fightTracker.numTurns)
+                .averageTurnsToWin((fightTracker.result == FightTracker.FightResult.WIN) ? fightTracker.numTurns : 0)
                 .averageDamageTaken(fightTracker.damageTaken)
                 .averageDamageDealt(fightTracker.damageDealt)
                 .build();
