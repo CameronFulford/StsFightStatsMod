@@ -310,7 +310,10 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
                 statsStore.stats = new CombatStats();
             } else {
                 logger.info("CombatStats config data found. Attempting to deserialize.");
+                long start = System.currentTimeMillis();
                 statsStore.stats = new Gson().fromJson(configDataJson, CombatStats.class);
+                long end = System.currentTimeMillis();
+                logger.info("Time to deserialize CombatStats: " + (end - start));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -662,9 +665,12 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     public JsonElement onSaveRaw() {
         try {
             logger.info("Saving CombatStats to json.");
+            long start = System.currentTimeMillis();
             Gson gson = new Gson();
             JsonElement statsJson = gson.toJsonTree(statsStore.stats);
+            long end = System.currentTimeMillis();
             saveConfig(gson.toJson(statsJson));
+            logger.info("Time to serialize CombatStats: " + (end - start));
             return gson.toJsonTree(statsStore.stats);
         } catch (Exception e) {
             logger.error("Failed converting stats to Json for saving.", e);
@@ -687,8 +693,11 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
 
     public void saveConfig(String statsJson) {
         try {
+            long start = System.currentTimeMillis();
             configData.setString(CombatStats.FIGHT_STATS_MOD_JSON_KEY, statsJson);
             configData.save();
+            long end = System.currentTimeMillis();
+            logger.info("Time to save config data: " + (end - start));
         } catch (Exception e) {
             logger.error("Failed to save stats to config.", e);
         }
