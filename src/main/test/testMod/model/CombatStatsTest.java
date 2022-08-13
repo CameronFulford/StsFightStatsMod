@@ -1,4 +1,4 @@
-package testMod.model;
+package battleStats.model;
 
 
 import org.junit.jupiter.api.Test;
