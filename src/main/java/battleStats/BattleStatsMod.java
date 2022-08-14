@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: DON'T MASS RENAME/REFACTOR
 //TODO: DON'T MASS RENAME/REFACTOR
@@ -152,11 +153,12 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     public static final String MOD_ID = "battleStats";
     // Track the details of the current fight.
     public static FightTracker fightTracker = new FightTracker();
-    public static StatsStore statsStore = new StatsStore();
-    public static EnemyCombatStats battleStats;
+    private static StatsStore statsStore = new StatsStore();
+    private static EnemyCombatStats battleStats;
     public static boolean inBattle = false;
     public static SpireConfig configData;
     public static final String CONFIG_FILE_NAME = "config_data";
+    private static AtomicBoolean dirtyStats = new AtomicBoolean(false);
 
     // =============== MAKE IMAGE PATHS =================
     
@@ -639,6 +641,10 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
             enemyCombatStats.addFightStats(fightTracker);
             logger.info("CombatStats updated.");
         }
+
+        // Set the dirty flag to true so that the stats will get saved.
+        dirtyStats.set(true);
+
         // Refresh the overall battle stats.
         refreshBattleStats(fightTracker.combatKey);
     }
@@ -664,14 +670,21 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     @Override
     public JsonElement onSaveRaw() {
         try {
-            logger.info("Saving CombatStats to json.");
-            long start = System.currentTimeMillis();
-            Gson gson = new Gson();
-            JsonElement statsJson = gson.toJsonTree(statsStore.stats);
-            long end = System.currentTimeMillis();
-            saveConfig(gson.toJson(statsJson));
-            logger.info("Time to serialize CombatStats: " + (end - start));
-            return gson.toJsonTree(statsStore.stats);
+            if (dirtyStats.get()) {
+                logger.info("Saving CombatStats to json.");
+                long start = System.currentTimeMillis();
+                Gson gson = new Gson();
+                JsonElement statsJson = gson.toJsonTree(statsStore.stats);
+                long end = System.currentTimeMillis();
+                logger.info("Time to serialize CombatStats: " + (end - start));
+                saveConfig(gson.toJson(statsJson));
+                // Clear the dirty flag once we save the stats.
+                dirtyStats.set(false);
+                return gson.toJsonTree(statsStore.stats);
+            } else {
+                logger.info("Skipping stats save since the stats have not been modified.");
+                return null;
+            }
         } catch (Exception e) {
             logger.error("Failed converting stats to Json for saving.", e);
             return null;
