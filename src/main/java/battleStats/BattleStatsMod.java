@@ -15,6 +15,7 @@ import battleStats.model.FightTracker;
 import battleStats.potions.PlaceholderPotion;
 import battleStats.stats.StatsStore;
 import battleStats.stats.StatsUtils;
+import battleStats.ui.StatsRenderer;
 import battleStats.util.IDCheckDontTouchPls;
 import battleStats.util.TextureLoader;
 import com.badlogic.gdx.Gdx;
@@ -159,6 +160,8 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     public static SpireConfig configData;
     public static final String CONFIG_FILE_NAME = "config_data";
     private static AtomicBoolean dirtyStats = new AtomicBoolean(false);
+
+    private static StatsRenderer statsRenderer = new StatsRenderer();
 
     // =============== MAKE IMAGE PATHS =================
     
@@ -562,25 +565,7 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
                 //&& ((AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT) || (AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMPLETE));
     }
     public static void renderStats(SpriteBatch spriteBatch) {
-        final String aggregateStatsFormatString = "%s\n\nCombats (wins/losses/total): %d/%d/%d\nAvg damage taken: %.1f\n" +
-                "Avg damage dealt: %.1f\nAverage # of turns to win: %.1f";
-        String aggregateStatsDisplay;
-        if (battleStats != null) {
-            aggregateStatsDisplay = String.format(aggregateStatsFormatString, battleStats.combatEnemyKey,
-                    battleStats.wins, battleStats.loss, battleStats.numCombats, battleStats.averageDamageTaken,
-                    battleStats.averageDamageDealt, battleStats.averageTurnsToWin);
-        } else {
-            final int defaultIntValue = 0;
-            final float defaultFloatValue = 0f;
-            aggregateStatsDisplay = String.format(aggregateStatsFormatString, fightTracker.combatKey, defaultIntValue,
-                    defaultIntValue, defaultIntValue, defaultFloatValue, defaultFloatValue, defaultFloatValue);
-        }
-        FontHelper.renderFont(spriteBatch, FontHelper.tipBodyFont, aggregateStatsDisplay, 10, 900, Color.WHITE);
-
-        // TODO: can render multi-line text with different fonts by offsetting text height. See TipHelper#getPowerTipHeight
-        String currentFightStats = String.format("%s\n\nTurns: %d\nDamage taken: %d\nDamage dealt: %d", fightTracker.combatKey,
-                fightTracker.numTurns, fightTracker.damageTaken, fightTracker.damageDealt);
-        FontHelper.renderFont(spriteBatch, FontHelper.tipBodyFont, currentFightStats, 10, 700, Color.WHITE);
+        statsRenderer.render(spriteBatch, battleStats, fightTracker);
     }
 
     @Override
