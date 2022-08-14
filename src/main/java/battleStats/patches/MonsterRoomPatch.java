@@ -1,8 +1,10 @@
 package battleStats.patches;
 
 import battleStats.BattleStatsMod;
+import battleStats.model.FightTracker;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.rooms.MonsterRoom;
 
@@ -12,12 +14,20 @@ import com.megacrit.cardcrawl.rooms.MonsterRoom;
 )
 public class MonsterRoomPatch {
 
-    public static void Prefix(AbstractRoom _instance, SpriteBatch spriteBatch) {
+    private static AbstractRoom currentRoom;
+
+    public static void Postfix(AbstractRoom _instance, SpriteBatch spriteBatch) {
         if (_instance instanceof MonsterRoom) {
-            // TODO: if we always render stats here, when entering a new MonsterRoom it momentarily displays the
-            //  previous combat stats since the receiveOnBattleStart method sets the current fight details and
-            //  refreshes the stats. Otherwise, if we use shouldRenderStats then the stats don't display when
-            //  loading into a completed monster room.
+            // Update the fight tracker if this is a new MonsterRoom instance.
+            if (!_instance.equals(currentRoom)) {
+                currentRoom = _instance;
+                BattleStatsMod.fightTracker = new FightTracker();
+                BattleStatsMod.fightTracker.combatKey = CardCrawlGame.dungeon.lastCombatMetricKey;
+
+                // Load stats for this encounter
+                BattleStatsMod.refreshBattleStats(BattleStatsMod.fightTracker.combatKey);
+            }
+
             if (true) {//BattleStatsMod.shouldRenderStats()) {
                 BattleStatsMod.renderStats(spriteBatch);
             }
