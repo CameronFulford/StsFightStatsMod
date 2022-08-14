@@ -544,20 +544,20 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
 
         // TODO: this seems like an overly complicated way to tell if the player is currently in a combat. Is there a better way?
         if (shouldRenderStats()) {
-            renderStats(spriteBatch);
+//            renderStats(spriteBatch);
         }
         // TODO: above seems to make text grow/shrink when hovering over cards. Look at TopPanel#renderDungeonInfo to see how the floor number
         //  and ascension number are rendered.
     }
 
-    private boolean shouldRenderStats() {
+    public static boolean shouldRenderStats() {
         // TODO: this seems like an overly complicated way to tell if the player is currently in a combat. Is there a better way?
         return inBattle;
 //        CardCrawlGame.isInARun() && AbstractDungeon.isPlayerInDungeon() && (AbstractDungeon.getCurrMapNode() != null)
 //                && (AbstractDungeon.getCurrRoom() != null) && (AbstractDungeon.getCurrRoom() instanceof MonsterRoom);
                 //&& ((AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT) || (AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMPLETE));
     }
-    private static void renderStats(SpriteBatch spriteBatch) {
+    public static void renderStats(SpriteBatch spriteBatch) {
         final String aggregateStatsFormatString = "%s\n\nCombats (wins/losses/total): %d/%d/%d\nAvg damage taken: %.1f\n" +
                 "Avg damage dealt: %.1f\nAverage # of turns to win: %.1f";
         String aggregateStatsDisplay;
