@@ -12,7 +12,6 @@ import battleStats.events.IdentityCrisisEvent;
 import battleStats.model.CombatStats;
 import battleStats.model.EnemyCombatStats;
 import battleStats.model.FightTracker;
-import battleStats.potions.PlaceholderPotion;
 import battleStats.stats.StatsStore;
 import battleStats.stats.StatsUtils;
 import battleStats.ui.StatsRenderer;
@@ -543,6 +542,7 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
 
         // Load stats for this encounter
         BattleStatsMod.refreshBattleStats(BattleStatsMod.fightTracker.combatKey);
+        statsRenderer.startPopInAnimation();
     }
 
     @Override
