@@ -531,11 +531,15 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
         logger.info("lastCombatMetricKey: " + CardCrawlGame.dungeon.lastCombatMetricKey);
         logger.info("MonsterRoom monsters: " + abstractRoom.monsters.monsters);
 
-//        fightTracker = new FightTracker();
-//        fightTracker.combatKey = CardCrawlGame.dungeon.lastCombatMetricKey;
-//
-//        // Load stats for this encounter
-//        refreshBattleStats(fightTracker.combatKey);
+//        initializeFightStats();
+    }
+
+    public static void initializeFightStats() {
+        BattleStatsMod.fightTracker = new FightTracker();
+        BattleStatsMod.fightTracker.combatKey = CardCrawlGame.dungeon.lastCombatMetricKey;
+
+        // Load stats for this encounter
+        BattleStatsMod.refreshBattleStats(BattleStatsMod.fightTracker.combatKey);
     }
 
     @Override

@@ -21,11 +21,8 @@ public class MonsterRoomPatch {
             // Update the fight tracker if this is a new MonsterRoom instance.
             if (!_instance.equals(currentRoom)) {
                 currentRoom = _instance;
-                BattleStatsMod.fightTracker = new FightTracker();
-                BattleStatsMod.fightTracker.combatKey = CardCrawlGame.dungeon.lastCombatMetricKey;
 
-                // Load stats for this encounter
-                BattleStatsMod.refreshBattleStats(BattleStatsMod.fightTracker.combatKey);
+                BattleStatsMod.initializeFightStats();
             }
 
             if (true) {//BattleStatsMod.shouldRenderStats()) {
