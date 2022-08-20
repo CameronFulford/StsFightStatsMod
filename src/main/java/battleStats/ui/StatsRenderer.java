@@ -51,27 +51,6 @@ public class StatsRenderer {
 
         // Note: general alignment implementation taken from GameOverScreen
 
-//        final String aggregateStatsFormatString = "%s\n\nCombats (wins/losses/total): %d/%d/%d\nAvg damage taken: %.1f\n" +
-//                "Avg damage dealt: %.1f\nAverage # of turns to win: %.1f";
-//        String aggregateStatsDisplay;
-//        if (stats != null) {
-//            aggregateStatsDisplay = String.format(aggregateStatsFormatString, stats.combatEnemyKey,
-//                    stats.wins, stats.loss, stats.numCombats, stats.averageDamageTaken,
-//                    stats.averageDamageDealt, stats.averageTurnsToWin);
-//        } else {
-//            final int defaultIntValue = 0;
-//            final float defaultFloatValue = 0f;
-//            aggregateStatsDisplay = String.format(aggregateStatsFormatString, fightTracker.combatKey, defaultIntValue,
-//                    defaultIntValue, defaultIntValue, defaultFloatValue, defaultFloatValue, defaultFloatValue);
-//        }
-//        FontHelper.renderFont(spriteBatch, FontHelper.tipBodyFont, aggregateStatsDisplay, 10, 900, TEXT_COLOR);
-//
-//        // TODO: can render multi-line text with different fonts by offsetting text height. See TipHelper#getPowerTipHeight
-//        String currentFightStats = String.format("%s\n\nTurns: %d\nDamage taken: %d\nDamage dealt: %d", fightTracker.combatKey,
-//                fightTracker.numTurns, fightTracker.damageTaken, fightTracker.damageDealt);
-//
-//        FontHelper.renderFont(spriteBatch, FontHelper.tipBodyFont, currentFightStats, 10, 700, TEXT_COLOR);
-
         float y = START_Y;
 
         // Render VS line
@@ -82,18 +61,17 @@ public class StatsRenderer {
         // Render aggregate stats lines
         if (stats != null) {
             for (StatLine line : aggregateStatsLines) {
-                FontHelper.renderFontLeftTopAligned(spriteBatch, font, line.label, LABEL_X, y, TEXT_COLOR);
-                FontHelper.renderFontRightTopAligned(spriteBatch, font, line.valueFunction.apply(stats, fightTracker), VALUE_X, y, TEXT_COLOR);
+                line.renderLine(spriteBatch, stats, fightTracker, font, y);
                 y -= lineHeight;
             }
         }
 
-        // TODO: render separator
+        // TODO: render separator between aggregate and current fight stats
+        y -= 10f;
 
         // Render combat stats lines
         for (StatLine line : combatStatsLines) {
-            FontHelper.renderFontLeftTopAligned(spriteBatch, font, line.label, LABEL_X, y, TEXT_COLOR);
-            FontHelper.renderFontRightTopAligned(spriteBatch, font, line.valueFunction.apply(stats, fightTracker), VALUE_X, y, TEXT_COLOR);
+            line.renderLine(spriteBatch, stats, fightTracker, font, y);
             y -= lineHeight;
         }
 
@@ -116,9 +94,42 @@ public class StatsRenderer {
     private static class StatLine {
         String label;
         BiFunction<EnemyCombatStats, FightTracker, String> valueFunction;
+        Color valueColor;
+        static final float HIGHLIGHT_TIME_SEC = 4f;
+        float highlightTimer = HIGHLIGHT_TIME_SEC;
+        String prevValue;
+
         StatLine(String label, BiFunction<EnemyCombatStats, FightTracker, String> valueFunction) {
             this.label = label;
             this.valueFunction = valueFunction;
+            this.valueColor = Color.WHITE.cpy();
+        }
+
+        void renderLine(SpriteBatch spriteBatch, EnemyCombatStats enemyCombatStats, FightTracker fightTracker, BitmapFont font, float y) {
+            FontHelper.renderFontLeftTopAligned(spriteBatch, font, label, LABEL_X, y, TEXT_COLOR);
+
+            updateHighlight();
+            String value = valueFunction.apply(enemyCombatStats, fightTracker);
+            if (!value.equals(prevValue)) {
+                startHighlight();
+                prevValue = value;
+            }
+            FontHelper.renderFontRightTopAligned(spriteBatch, font, value, VALUE_X, y, valueColor);
+        }
+
+        void updateHighlight() {
+            highlightTimer -= Gdx.graphics.getDeltaTime();
+            if (highlightTimer < 0) {
+                highlightTimer = 0;
+            }
+            valueColor.lerp(Color.WHITE, (HIGHLIGHT_TIME_SEC - highlightTimer)/HIGHLIGHT_TIME_SEC);
+            // Copy the alpha from the general text color to get the same fade in effect.
+            valueColor.a = TEXT_COLOR.a;
+        }
+
+        void startHighlight() {
+            valueColor = Color.RED.cpy();
+            highlightTimer = HIGHLIGHT_TIME_SEC;
         }
     }
 }
