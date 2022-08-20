@@ -95,7 +95,7 @@ public class StatsRenderer {
         String label;
         BiFunction<EnemyCombatStats, FightTracker, String> valueFunction;
         Color valueColor;
-        static final float HIGHLIGHT_TIME_SEC = 4f;
+        static final float HIGHLIGHT_TIME_SEC = 2f;
         float highlightTimer = HIGHLIGHT_TIME_SEC;
         String prevValue;
 
@@ -118,17 +118,19 @@ public class StatsRenderer {
         }
 
         void updateHighlight() {
-            highlightTimer -= Gdx.graphics.getDeltaTime();
-            if (highlightTimer < 0) {
-                highlightTimer = 0;
+            if (highlightTimer > 0) {
+                highlightTimer -= Gdx.graphics.getDeltaTime();
+                valueColor.set(Color.RED.cpy());
+                if (highlightTimer < 0) {
+                    highlightTimer = 0;
+                }
+                valueColor.lerp(Color.WHITE, (HIGHLIGHT_TIME_SEC - highlightTimer) / HIGHLIGHT_TIME_SEC);
             }
-            valueColor.lerp(Color.WHITE, (HIGHLIGHT_TIME_SEC - highlightTimer)/HIGHLIGHT_TIME_SEC);
             // Copy the alpha from the general text color to get the same fade in effect.
             valueColor.a = TEXT_COLOR.a;
         }
 
         void startHighlight() {
-            valueColor = Color.RED.cpy();
             highlightTimer = HIGHLIGHT_TIME_SEC;
         }
     }
