@@ -43,7 +43,7 @@ public class StatsRenderer {
                         (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageTurnsToWin) : "-", Color.GREEN)
         );
         combatStatsLines = Arrays.asList(
-                new StatLine("Turns", (ecs, ft) -> String.format("%d", ft.numTurns), Color.BLUE),
+                new StatLine("Turns", (ecs, ft) -> String.format("%d", ft.numTurns), Color.SKY),
                 new StatLine("Damage taken", (ecs, ft) -> String.format("%d", ft.damageTaken), true),
                 new StatLine("Damage dealt", (ecs, ft) -> "" + ft.damageDealt, true)
         );
@@ -100,11 +100,11 @@ public class StatsRenderer {
         BiFunction<EnemyCombatStats, FightTracker, String> valueFunction;
         Color valueColor;
         final Color highlightColor;
-        static final float HIGHLIGHT_TIME_SEC = 3f;
+        static final float HIGHLIGHT_TIME_SEC = 2f;
         float highlightTimer = HIGHLIGHT_TIME_SEC;
         String prevValue;
         final boolean shakeValue;
-        static final float SHAKE_TIME_SEC = 0.75f;
+        static final float SHAKE_TIME_SEC = 0.5f;
         static final float SHAKE_OFFSET_RANGE = 5f;
         float xOffset = 0;
         float yOffset = 0;
