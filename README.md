@@ -12,6 +12,19 @@
 - when loading into post-combat for an event combat (e.g., Masked Bandits) the AbstractDungeon.lastCombatMetricKey is not set and will be null.
 how do we figure out the combat key when loading into an event post combat? Possibly use onSaveRaw to save FightTracker during the
 game. That way, we can load the FightTracker to display as well as extract the last combat key.
+- Mind Bloom combat loads the lastCombatMetricKey as "Mind Bloom Boss Battle". Should I just keep it like that even though
+the bosses might be different? I could also get the name of the monster (boss) from the room.
+
+
+## BUGS
+1. Not sure if this is my bug, but after fighting and winning against the double orb walker event, I quit the game before
+moving to the next room to verify it reloaded the stats correctly. But when I reloaded it loaded a shop room instead and
+there were no rewards. Though my stats did load correctly. Not sure if this is expected or an existing bug.
+2. After Mind Bloom combat before advancing to the next room, I save and quit. Then reloaded the game and it reloaded my
+saved stats correctly, but instead of being post-combat the event started from the beginning so I had to fight the same
+combat a second time. This effectively meant I saved 2 copies of the combat stats since I had fought it twice. This might
+be a game bug.
+
 
 ### Notes
 
