@@ -13,6 +13,7 @@ import com.megacrit.cardcrawl.helpers.FontHelper;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.BiFunction;
 
 public class StatsRenderer {
@@ -33,18 +34,18 @@ public class StatsRenderer {
         // TODO: handle null EnemyCombatStats. Add null check or alternate StatLines.
         aggregateStatsLines = Arrays.asList(
                 new StatLine("Combats (wins/losses/total)",
-                        (ecs, ft) -> ecs != null ? String.format("%d/%d/%d", ecs.wins, ecs.loss, ecs.numCombats) : "-/-/-"),
+                        (ecs, ft) -> ecs != null ? String.format("%d/%d/%d", ecs.wins, ecs.loss, ecs.numCombats) : "-/-/-", Color.GREEN),
                 new StatLine("Avg damage taken",
-                        (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageDamageTaken) : "-"),
+                        (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageDamageTaken) : "-", Color.GREEN),
                 new StatLine("Avg damage dealt",
-                        (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageDamageDealt) : "-"),
+                        (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageDamageDealt) : "-", Color.GREEN),
                 new StatLine("Avg # of turns to win",
-                        (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageTurnsToWin) : "-")
+                        (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageTurnsToWin) : "-", Color.GREEN)
         );
         combatStatsLines = Arrays.asList(
-                new StatLine("Turns", (ecs, ft) -> String.format("%d", ft.numTurns)),
-                new StatLine("Damage taken", (ecs, ft) -> String.format("%d", ft.damageTaken)),
-                new StatLine("Damage dealt", (ecs, ft) -> "" + ft.damageDealt)
+                new StatLine("Turns", (ecs, ft) -> String.format("%d", ft.numTurns), Color.BLUE),
+                new StatLine("Damage taken", (ecs, ft) -> String.format("%d", ft.damageTaken), true),
+                new StatLine("Damage dealt", (ecs, ft) -> "" + ft.damageDealt, true)
         );
     }
 
@@ -98,14 +99,32 @@ public class StatsRenderer {
         String label;
         BiFunction<EnemyCombatStats, FightTracker, String> valueFunction;
         Color valueColor;
-        static final float HIGHLIGHT_TIME_SEC = 2f;
+        final Color highlightColor;
+        static final float HIGHLIGHT_TIME_SEC = 3f;
         float highlightTimer = HIGHLIGHT_TIME_SEC;
         String prevValue;
+        final boolean shakeValue;
+        static final float SHAKE_TIME_SEC = 0.75f;
+        static final float SHAKE_OFFSET_RANGE = 5f;
+        float xOffset = 0;
+        float yOffset = 0;
+        Random random = new Random();
 
         StatLine(String label, BiFunction<EnemyCombatStats, FightTracker, String> valueFunction) {
+            this(label, valueFunction, false, Color.RED);
+        }
+        StatLine(String label, BiFunction<EnemyCombatStats, FightTracker, String> valueFunction, Color highlightColor) {
+            this(label, valueFunction, false, highlightColor);
+        }
+        StatLine(String label, BiFunction<EnemyCombatStats, FightTracker, String> valueFunction, boolean shakeValue) {
+            this(label, valueFunction, shakeValue, Color.RED);
+        }
+        StatLine(String label, BiFunction<EnemyCombatStats, FightTracker, String> valueFunction, boolean shakeValue, Color highlightColor) {
             this.label = label;
             this.valueFunction = valueFunction;
             this.valueColor = Color.WHITE.cpy();
+            this.shakeValue = shakeValue;
+            this.highlightColor = highlightColor;
         }
 
         void renderLine(SpriteBatch spriteBatch, EnemyCombatStats enemyCombatStats, FightTracker fightTracker, BitmapFont font, float y) {
@@ -117,18 +136,33 @@ public class StatsRenderer {
                 startHighlight();
                 prevValue = value;
             }
-            FontHelper.renderFontRightTopAligned(spriteBatch, font, value, VALUE_X, y, valueColor);
+            FontHelper.renderFontRightTopAligned(spriteBatch, font, value, VALUE_X + xOffset, y + yOffset, valueColor);
         }
 
         void updateHighlight() {
             if (highlightTimer > 0) {
                 highlightTimer -= Gdx.graphics.getDeltaTime();
-                valueColor.set(Color.RED.cpy());
+                valueColor.set(highlightColor);
                 if (highlightTimer < 0) {
                     highlightTimer = 0;
                 }
                 valueColor.lerp(Color.WHITE, (HIGHLIGHT_TIME_SEC - highlightTimer) / HIGHLIGHT_TIME_SEC);
             }
+
+            if (shakeValue) {
+                float shakeTimer = highlightTimer - HIGHLIGHT_TIME_SEC + SHAKE_TIME_SEC;
+                if (shakeTimer <= 0) {
+                    xOffset = 0;
+                    yOffset = 0;
+                } else {
+                    // Update xOffset and yOffset to make the value "shake"
+                    float rand1 = random.nextFloat() - 0.5f;
+                    float rand2 = random.nextFloat() - 0.5f;
+                    xOffset = 2 * rand1 * SHAKE_OFFSET_RANGE * shakeTimer / SHAKE_TIME_SEC;
+                    yOffset = 2 * rand2 * SHAKE_OFFSET_RANGE * shakeTimer / SHAKE_TIME_SEC;
+                }
+            }
+
             // Copy the alpha from the general text color to get the same fade in effect.
             valueColor.a = TEXT_COLOR.a;
         }
