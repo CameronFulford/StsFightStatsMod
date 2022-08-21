@@ -101,7 +101,7 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     public static boolean enablePlaceholder = true; // The boolean we'll be setting on/off (true/false)
 
     //This is for the in-game mod settings panel.
-    private static final String MODNAME = "Test Mod";
+    private static final String MODNAME = "Battle Stats";
     private static final String AUTHOR = "Camputer"; // And pretty soon - You!
     private static final String DESCRIPTION = "A base for Slay the Spire to start your own mod from, feat. the Default.";
     
@@ -153,6 +153,7 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     public static final String MOD_ID = "battleStats";
     // Track the details of the current fight.
     public static FightTracker fightTracker = new FightTracker();
+    public static boolean initializeFightTrackerFromLoadedData = false;
     private static StatsStore statsStore = new StatsStore();
     private static EnemyCombatStats battleStats;
     public static boolean inBattle = false;
@@ -537,8 +538,17 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     }
 
     public static void initializeFightStats() {
-        BattleStatsMod.fightTracker = new FightTracker();
-        BattleStatsMod.fightTracker.combatKey = CardCrawlGame.dungeon.lastCombatMetricKey;
+        if (initializeFightTrackerFromLoadedData && AbstractDungeon.getCurrRoom().isBattleOver) {
+            // Only use loaded FightTracker data on the first initialization if we're in a post-battle room.
+            logger.info("Initializing FightTracker from loaded data: " + fightTracker);
+        } else {
+            logger.info("Initializing FightTracker for enemy " + CardCrawlGame.dungeon.lastCombatMetricKey);
+            BattleStatsMod.fightTracker = new FightTracker();
+            BattleStatsMod.fightTracker.combatKey = CardCrawlGame.dungeon.lastCombatMetricKey;
+        }
+
+        // Clear the initializeFightTrackerFromLoadedData flag regardless of whether we initialized from loaded data or not.
+        initializeFightTrackerFromLoadedData = false;
 
         // Load stats for this encounter
         BattleStatsMod.refreshBattleStats(BattleStatsMod.fightTracker.combatKey);
@@ -659,21 +669,22 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     @Override
     public JsonElement onSaveRaw() {
         try {
+            Gson gson = new Gson();
             if (dirtyStats.get()) {
                 logger.info("Saving CombatStats to json.");
                 long start = System.currentTimeMillis();
-                Gson gson = new Gson();
-                JsonElement statsJson = gson.toJsonTree(statsStore.stats);
+                String statsJson = gson.toJson(statsStore.stats);
                 long end = System.currentTimeMillis();
                 logger.info("Time to serialize CombatStats: " + (end - start));
-                saveConfig(gson.toJson(statsJson));
+                saveConfig(statsJson);
                 // Clear the dirty flag once we save the stats.
                 dirtyStats.set(false);
-                return gson.toJsonTree(statsStore.stats);
             } else {
                 logger.info("Skipping stats save since the stats have not been modified.");
-                return null;
             }
+
+            logger.info("Saving FightTracker to game data: " + fightTracker);
+            return gson.toJsonTree(fightTracker);
         } catch (Exception e) {
             logger.error("Failed converting stats to Json for saving.", e);
             return null;
@@ -682,15 +693,21 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
 
     @Override
     public void onLoadRaw(JsonElement jsonElement) {
-        if (jsonElement != null) {
-//            logger.info("Loading CombatStats from json.");
-//            Gson gson = new Gson();
-//            statsStore.stats = gson.fromJson(jsonElement, CombatStats.class);
-//            logger.info("Loaded CombatStats: " + statsStore.stats);
-        } else {
-            logger.info("No CombatStats JsonElement to load.");
+        try {
+            if (jsonElement != null) {
+                logger.info("Loading FightTracker from json game data.");
+                Gson gson = new Gson();
+                fightTracker = gson.fromJson(jsonElement, FightTracker.class);
+                logger.info("Loaded FightTracker from json game data: " + fightTracker);
+                if (fightTracker != null && fightTracker.combatKey != null) {
+                    initializeFightTrackerFromLoadedData = true;
+                }
+            } else {
+                logger.info("No FightTracker JsonElement to load.");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to load FightTracker from json game data.", e);
         }
-
     }
 
     public void saveConfig(String statsJson) {

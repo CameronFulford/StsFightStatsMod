@@ -20,6 +20,7 @@ public class StatsRenderer {
     private static final float START_Y = 900;
     private static final float LABEL_X = 10;
     private static final float VALUE_X = 400;
+    private static final float CENTER_X = (VALUE_X + LABEL_X) / 2f;
 
     private static final Color TEXT_COLOR = Color.WHITE.cpy();
     private static final float POPIN_DURATION_SECONDS = 2f;
@@ -31,10 +32,14 @@ public class StatsRenderer {
     public StatsRenderer() {
         // TODO: handle null EnemyCombatStats. Add null check or alternate StatLines.
         aggregateStatsLines = Arrays.asList(
-                new StatLine("Combats (wins/losses/total)", (ecs, ft) -> String.format("%d/%d/%d", ecs.wins, ecs.loss, ecs.numCombats)),
-                new StatLine("Avg damage taken", (ecs, ft) -> String.format("%.1f", ecs.averageDamageTaken)),
-                new StatLine("Avg damage dealt", (ecs, ft) -> String.format("%.1f", ecs.averageDamageDealt)),
-                new StatLine("Avg # of turns to win", (ecs, ft) -> String.format("%.1f", ecs.averageTurnsToWin))
+                new StatLine("Combats (wins/losses/total)",
+                        (ecs, ft) -> ecs != null ? String.format("%d/%d/%d", ecs.wins, ecs.loss, ecs.numCombats) : "-/-/-"),
+                new StatLine("Avg damage taken",
+                        (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageDamageTaken) : "-"),
+                new StatLine("Avg damage dealt",
+                        (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageDamageDealt) : "-"),
+                new StatLine("Avg # of turns to win",
+                        (ecs, ft) -> ecs != null ? String.format("%.1f", ecs.averageTurnsToWin) : "-")
         );
         combatStatsLines = Arrays.asList(
                 new StatLine("Turns", (ecs, ft) -> String.format("%d", ft.numTurns)),
@@ -54,16 +59,14 @@ public class StatsRenderer {
         float y = START_Y;
 
         // Render VS line
-        FontHelper.renderFontLeftTopAligned(spriteBatch, font, String.format("%s VS %s", AbstractDungeon.player.name, fightTracker.combatKey),
-                LABEL_X, y, TEXT_COLOR);
+        FontHelper.renderFontCentered(spriteBatch, font, String.format("%s VS %s", AbstractDungeon.player.name, fightTracker.combatKey),
+                CENTER_X, y, TEXT_COLOR);
         y -= lineHeight + 5f;
 
         // Render aggregate stats lines
-        if (stats != null) {
-            for (StatLine line : aggregateStatsLines) {
-                line.renderLine(spriteBatch, stats, fightTracker, font, y);
-                y -= lineHeight;
-            }
+        for (StatLine line : aggregateStatsLines) {
+            line.renderLine(spriteBatch, stats, fightTracker, font, y);
+            y -= lineHeight;
         }
 
         // TODO: render separator between aggregate and current fight stats
