@@ -5,11 +5,15 @@ import battleStats.model.FightTracker;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Interpolation;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.FontHelper;
+import com.megacrit.cardcrawl.helpers.Hitbox;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.helpers.input.InputHelper;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,8 +32,22 @@ public class StatsRenderer {
 
     private float popinTimer = POPIN_DURATION_SECONDS;
 
+    // Box constants
+    private static final float SHADOW_DIST_X = 9.0F * 1f;//Settings.scale;
+    private static final float SHADOW_DIST_Y = 14.0F * 1f;//Settings.scale;
+    private static final float BOX_EDGE_H = 32.0F * 1f;//Settings.scale;
+    private static final float BOX_BODY_H = 64.0F * 1f;//Settings.scale;
+    private static final float BOX_W = 320.0F * 1f;//Settings.scale;
+
     private List<StatLine> aggregateStatsLines;
     private List<StatLine> combatStatsLines;
+
+    private Hitbox hb = new Hitbox(0f, 0f);
+    private GlyphLayout layout = new GlyphLayout();
+    private boolean isClicked = false;
+    private float dragX = 0f;
+    private float dragY = 0f;
+
     public StatsRenderer() {
         // TODO: handle null EnemyCombatStats. Add null check or alternate StatLines.
         aggregateStatsLines = Arrays.asList(
@@ -55,14 +73,30 @@ public class StatsRenderer {
         BitmapFont font = FontHelper.tipBodyFont;
         float lineHeight = font.getLineHeight() * Settings.scale;
 
+        // Check for hitbox dragging
+        if (hb.clickStarted || hb.clicked) {
+            isClicked = true;
+        } else {
+            dragX = InputHelper.mX;
+            isClicked = false;
+        }
+
         // Note: general alignment implementation taken from GameOverScreen
 
         float y = START_Y;
+        float hbX = 1000f;
+        float hbW = 0f;
+        float hbH = 0;
 
         // Render VS line
-        FontHelper.renderFontCentered(spriteBatch, font, String.format("%s VS %s", AbstractDungeon.player.name, fightTracker.combatKey),
-                CENTER_X, y, TEXT_COLOR);
-        y -= lineHeight + 5f;
+        String vsLine = String.format("%s VS %s", AbstractDungeon.player.name, fightTracker.combatKey);
+        FontHelper.renderFontCentered(spriteBatch, font, vsLine, CENTER_X, y - lineHeight/2f, TEXT_COLOR);
+        y -= lineHeight*1.5f + 5f;
+
+        layout.setText(font, vsLine);
+        hbX = Math.min(hbX, CENTER_X - layout.width/2f);
+        hbW = Math.max(hbW, layout.width);
+
 
         // Render aggregate stats lines
         for (StatLine line : aggregateStatsLines) {
@@ -80,7 +114,19 @@ public class StatsRenderer {
         }
 
         // Test
-        FontHelper.renderFont(spriteBatch, font, String.format("scale %f, asc %f, desc %f, line height %f, x height %f", Settings.scale, font.getAscent(), font.getDescent(), font.getLineHeight(), font.getXHeight()), 10, 300, Color.WHITE);
+        FontHelper.renderFont(spriteBatch, font,
+                String.format("hb clicked %s, isClickStarting %s, InputHelper.mX", hb.clicked, hb.clickStarted, InputHelper.mX), 10, 400, Color.WHITE);
+//        renderBox(500, 500, spriteBatch);
+
+        // Assumes static StatLine width
+        float statsLineWidth = VALUE_X - LABEL_X;
+        hbW = Math.max(hbW, statsLineWidth);
+        hbH = START_Y - y;
+        layout.setText(font, vsLine);
+        hb.resize(hbW, hbH);
+        hb.translate(LABEL_X + InputHelper.mX - dragX, y);
+        hb.update();
+        hb.render(spriteBatch);
     }
 
     public void startPopInAnimation() {
@@ -113,12 +159,15 @@ public class StatsRenderer {
         StatLine(String label, BiFunction<EnemyCombatStats, FightTracker, String> valueFunction) {
             this(label, valueFunction, false, Color.RED);
         }
+
         StatLine(String label, BiFunction<EnemyCombatStats, FightTracker, String> valueFunction, Color highlightColor) {
             this(label, valueFunction, false, highlightColor);
         }
+
         StatLine(String label, BiFunction<EnemyCombatStats, FightTracker, String> valueFunction, boolean shakeValue) {
             this(label, valueFunction, shakeValue, Color.RED);
         }
+
         StatLine(String label, BiFunction<EnemyCombatStats, FightTracker, String> valueFunction, boolean shakeValue, Color highlightColor) {
             this.label = label;
             this.valueFunction = valueFunction;
@@ -129,7 +178,6 @@ public class StatsRenderer {
 
         void renderLine(SpriteBatch spriteBatch, EnemyCombatStats enemyCombatStats, FightTracker fightTracker, BitmapFont font, float y) {
             FontHelper.renderFontLeftTopAligned(spriteBatch, font, label, LABEL_X, y, TEXT_COLOR);
-
             updateHighlight();
             String value = valueFunction.apply(enemyCombatStats, fightTracker);
             if (!value.equals(prevValue)) {
@@ -170,5 +218,27 @@ public class StatsRenderer {
         void startHighlight() {
             highlightTimer = HIGHLIGHT_TIME_SEC;
         }
+    }
+
+    private static void renderBox(float x, float y, SpriteBatch sb) {
+        float h = 50f;
+
+
+        sb.setColor(Settings.TOP_PANEL_SHADOW_COLOR);
+        sb.draw(ImageMaster.KEYWORD_TOP, x + SHADOW_DIST_X, y - SHADOW_DIST_Y, BOX_W, BOX_EDGE_H);
+        sb.draw(ImageMaster.KEYWORD_BODY, x + SHADOW_DIST_X, y - h - BOX_EDGE_H - SHADOW_DIST_Y, BOX_W, h + BOX_EDGE_H);
+        sb.draw(ImageMaster.KEYWORD_BOT, x + SHADOW_DIST_X, y - h - BOX_BODY_H - SHADOW_DIST_Y, BOX_W, BOX_EDGE_H);
+
+
+        sb.setColor(Color.WHITE);
+        sb.draw(ImageMaster.KEYWORD_TOP, x, y, BOX_W, BOX_EDGE_H);
+        sb.draw(ImageMaster.KEYWORD_BODY, x, y - h - BOX_EDGE_H, BOX_W, h + BOX_EDGE_H);
+        sb.draw(ImageMaster.KEYWORD_BOT, x, y - h - BOX_BODY_H, BOX_W, BOX_EDGE_H);
+
+
+//        FontHelper.renderFontLeftTopAligned(sb, FontHelper.tipHeaderFont, title, x + TEXT_OFFSET_X, y + HEADER_OFFSET_Y, Settings.GOLD_COLOR);
+
+
+//        FontHelper.renderSmartText(sb, FontHelper.tipBodyFont, description, x + TEXT_OFFSET_X, y + BODY_OFFSET_Y, BODY_TEXT_WIDTH, TIP_DESC_LINE_SPACING, BASE_COLOR);
     }
 }

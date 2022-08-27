@@ -14,7 +14,7 @@ how do we figure out the combat key when loading into an event post combat? Poss
 game. That way, we can load the FightTracker to display as well as extract the last combat key.
 - Mind Bloom combat loads the lastCombatMetricKey as "Mind Bloom Boss Battle". Should I just keep it like that even though
 the bosses might be different? I could also get the name of the monster (boss) from the room.
-
+- the stats display can overlap with orbs. If we make this display draggable/collapsable that would help.
 
 ## BUGS
 1. Not sure if this is my bug, but after fighting and winning against the double orb walker event, I quit the game before
@@ -34,3 +34,6 @@ be a game bug.
 - AbstractEvent#enterCombat() called from several events that may have combats and need to be handled specially since they are not MonsterRooms
 -   AbstractDungeon.isLoadingPostCombatSave
   - Mind Bloom, Mysterious Sphere, Colosseum, Masked Bandits, Dead Adventurer, Mushrooms
+- Check out FontHelper.getSmartHeight to get height of text lines. See TipHelper#render, also FontHelper.renderSmartText
+- To render stats in a PowerTip style box, see TipHelper#renderPowerTips and TipHelper#renderTipBox
+- to render text at scale, try FontHelper#renderSmartText with scale
