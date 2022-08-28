@@ -159,7 +159,6 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     public static boolean inBattle = false;
     public static SpireConfig configData;
     public static final String CONFIG_FILE_NAME = "config_data";
-    private static AtomicBoolean dirtyStats = new AtomicBoolean(false);
 
     private static StatsRenderer statsRenderer;
 
@@ -649,11 +648,11 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
             logger.info("CombatStats updated.");
         }
 
-        // Set the dirty flag to true so that the stats will get saved.
-        dirtyStats.set(true);
-
         // Refresh the overall battle stats.
         refreshBattleStats(fightTracker.combatKey);
+
+        logger.info("Saving CombatStats to json.");
+        saveConfig(serializeStats());
     }
 
     public static void refreshBattleStats(String enemy) {
@@ -674,23 +673,19 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
         }
     }
 
+    private static String serializeStats() {
+        Gson gson = new Gson();
+        long start = System.currentTimeMillis();
+        String statsJson = gson.toJson(statsStore.stats);
+        long end = System.currentTimeMillis();
+        logger.info("Time to serialize CombatStats: " + (end - start));
+        return statsJson;
+    }
+
     @Override
     public JsonElement onSaveRaw() {
         try {
             Gson gson = new Gson();
-            if (dirtyStats.get()) {
-                logger.info("Saving CombatStats to json.");
-                long start = System.currentTimeMillis();
-                String statsJson = gson.toJson(statsStore.stats);
-                long end = System.currentTimeMillis();
-                logger.info("Time to serialize CombatStats: " + (end - start));
-                saveConfig(statsJson);
-                // Clear the dirty flag once we save the stats.
-                dirtyStats.set(false);
-            } else {
-                logger.info("Skipping stats save since the stats have not been modified.");
-            }
-
             logger.info("Saving FightTracker to game data: " + fightTracker);
             return gson.toJsonTree(fightTracker);
         } catch (Exception e) {
@@ -718,7 +713,7 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
         }
     }
 
-    public void saveConfig(String statsJson) {
+    public static void saveConfig(String statsJson) {
         try {
             long start = System.currentTimeMillis();
             configData.setString(CombatStats.FIGHT_STATS_MOD_JSON_KEY, statsJson);

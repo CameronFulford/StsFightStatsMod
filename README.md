@@ -20,6 +20,8 @@ game. That way, we can load the FightTracker to display as well as extract the l
 - Mind Bloom combat loads the lastCombatMetricKey as "Mind Bloom Boss Battle". Should I just keep it like that even though
 the bosses might be different? I could also get the name of the monster (boss) from the room.
 - Add mod config options to save/restore text offsets. Other mod config options? Text size?
+- Update loss stats if abandoning run from main menu screen. Maybe patch ConfirmPopup#abandonRunFromMainMenu. 
+Alternative: patch ConfirmPopup#yesButtonEffect and check if type is ABANDON_MAIN_MENU or ABANDON_MID_RUN.
 
 ## BUGS
 1. Not sure if this is my bug, but after fighting and winning against the double orb walker event, I quit the game before
@@ -42,3 +44,4 @@ be a game bug.
 - Check out FontHelper.getSmartHeight to get height of text lines. See TipHelper#render, also FontHelper.renderSmartText
 - To render stats in a PowerTip style box, see TipHelper#renderPowerTips and TipHelper#renderTipBox
 - to render text at scale, try FontHelper#renderSmartText with scale
+- 
