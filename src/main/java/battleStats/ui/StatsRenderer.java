@@ -22,13 +22,14 @@ import java.util.function.BiFunction;
 
 public class StatsRenderer {
     // TODO: scale X,Y values. Align stats top to bottom of the top panel.
-    private static final float START_Y = 900;
+
     private static final float LABEL_X = 10;
     private static final float VALUE_X = 400;
+    private static final float START_Y = 900;
     private static final float CENTER_X = (VALUE_X + LABEL_X) / 2f;
 
     private static final Color TEXT_COLOR = Color.WHITE.cpy();
-    private static final float POPIN_DURATION_SECONDS = 2f;
+    private static final float POPIN_DURATION_SECONDS = 1f;
 
     private float popinTimer = POPIN_DURATION_SECONDS;
 
@@ -96,24 +97,24 @@ public class StatsRenderer {
 
         // Note: general alignment implementation taken from GameOverScreen
 
-        float y = START_Y;
-        float hbX = 1000f;
+        float y = START_Y + yOffset;
+        float labelX = LABEL_X + xOffset;
+        float valueX = VALUE_X + xOffset;
+        float centerX = CENTER_X + xOffset;
         float hbW = 0f;
-        float hbH = 0;
 
         // Render VS line
         String vsLine = String.format("%s VS %s", AbstractDungeon.player.name, fightTracker.combatKey);
-        FontHelper.renderFontCentered(spriteBatch, font, vsLine, CENTER_X, y - lineHeight/2f, TEXT_COLOR);
+        FontHelper.renderFontCentered(spriteBatch, font, vsLine, centerX, y - lineHeight/2f, TEXT_COLOR);
         y -= lineHeight*1.5f + 5f;
 
         layout.setText(font, vsLine);
-        hbX = Math.min(hbX, CENTER_X - layout.width/2f);
         hbW = Math.max(hbW, layout.width);
 
 
         // Render aggregate stats lines
         for (StatLine line : aggregateStatsLines) {
-            line.renderLine(spriteBatch, stats, fightTracker, font, y);
+            line.renderLine(spriteBatch, stats, fightTracker, font, labelX, valueX, y);
             y -= lineHeight;
         }
 
@@ -122,7 +123,7 @@ public class StatsRenderer {
 
         // Render combat stats lines
         for (StatLine line : combatStatsLines) {
-            line.renderLine(spriteBatch, stats, fightTracker, font, y);
+            line.renderLine(spriteBatch, stats, fightTracker, font, labelX, valueX, y);
             y -= lineHeight;
         }
 
@@ -131,13 +132,13 @@ public class StatsRenderer {
                 String.format("hb clicked %s, isClickStarting %s, dragX %f", hb.clicked, hb.clickStarted, dragX), 10, 400, Color.WHITE);
 //        renderBox(500, 500, spriteBatch);
 
-        // Assumes static StatLine width
+        // Resize and translate hitbox. Assumes static StatLine width.
         float statsLineWidth = VALUE_X - LABEL_X;
         hbW = Math.max(hbW, statsLineWidth);
-        hbH = START_Y - y;
+        float hbH = START_Y + yOffset - y;
         layout.setText(font, vsLine);
         hb.resize(hbW, hbH);
-        hb.translate(LABEL_X + xOffset, y + yOffset);
+        hb.translate(labelX, y);
         hb.render(spriteBatch);
     }
 
@@ -188,15 +189,16 @@ public class StatsRenderer {
             this.highlightColor = highlightColor;
         }
 
-        void renderLine(SpriteBatch spriteBatch, EnemyCombatStats enemyCombatStats, FightTracker fightTracker, BitmapFont font, float y) {
-            FontHelper.renderFontLeftTopAligned(spriteBatch, font, label, LABEL_X, y, TEXT_COLOR);
+        void renderLine(SpriteBatch spriteBatch, EnemyCombatStats enemyCombatStats, FightTracker fightTracker, BitmapFont font,
+                        float labelX, float valueX, float y) {
+            FontHelper.renderFontLeftTopAligned(spriteBatch, font, label, labelX, y, TEXT_COLOR);
             updateHighlight();
             String value = valueFunction.apply(enemyCombatStats, fightTracker);
             if (!value.equals(prevValue)) {
                 startHighlight();
                 prevValue = value;
             }
-            FontHelper.renderFontRightTopAligned(spriteBatch, font, value, VALUE_X + xOffset, y + yOffset, valueColor);
+            FontHelper.renderFontRightTopAligned(spriteBatch, font, value, valueX + xOffset, y + yOffset, valueColor);
         }
 
         void updateHighlight() {
