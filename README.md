@@ -1,5 +1,10 @@
 # StsFightStatsMod
 
+## Features
+1. Saves stats for each combat across runs. Displays the current combat's stats and the aggregates stats from all
+encounters with the enemy.
+2. Draggable stats makes repositioning on the screen simple. Left-click and drag to reposition the stats display.
+
 ## TODO
 - count loss when run is abandoned
 - save stats to file after loss
@@ -14,7 +19,6 @@ how do we figure out the combat key when loading into an event post combat? Poss
 game. That way, we can load the FightTracker to display as well as extract the last combat key.
 - Mind Bloom combat loads the lastCombatMetricKey as "Mind Bloom Boss Battle". Should I just keep it like that even though
 the bosses might be different? I could also get the name of the monster (boss) from the room.
-- the stats display can overlap with orbs. If we make this display draggable/collapsable that would help.
 
 ## BUGS
 1. Not sure if this is my bug, but after fighting and winning against the double orb walker event, I quit the game before

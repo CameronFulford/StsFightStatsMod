@@ -28,6 +28,12 @@ public class StatsRenderer {
     private static final float START_Y = 900;
     private static final float CENTER_X = (VALUE_X + LABEL_X) / 2f;
 
+    // TODO: get actual screen width and Y limits to use here for offset limiting
+    private static final float MIN_X_OFFSET = -CENTER_X;
+    private static final float MAX_X_OFFSET = 1000f;
+    private static final float MIN_Y_OFFSET = -START_Y + 200;
+    private static final float MAX_Y_OFFSET = 200;
+
     private static final Color TEXT_COLOR = Color.WHITE.cpy();
     private static final float POPIN_DURATION_SECONDS = 1f;
 
@@ -84,8 +90,8 @@ public class StatsRenderer {
             isClicked = false;
         }
         if (isClicked) {
-            xOffset = InputHelper.mX - dragX;
-            yOffset = InputHelper.mY - dragY;
+            xOffset = Math.max(MIN_X_OFFSET, Math.min(MAX_X_OFFSET, InputHelper.mX - dragX));
+            yOffset = Math.max(MIN_Y_OFFSET, Math.min(MAX_Y_OFFSET, InputHelper.mY - dragY));
         }
     }
 
@@ -105,8 +111,8 @@ public class StatsRenderer {
 
         // Render VS line
         String vsLine = String.format("%s VS %s", AbstractDungeon.player.name, fightTracker.combatKey);
-        FontHelper.renderFontCentered(spriteBatch, font, vsLine, centerX, y - lineHeight/2f, TEXT_COLOR);
-        y -= lineHeight*1.5f + 5f;
+        FontHelper.renderFontCentered(spriteBatch, font, vsLine, centerX, y - lineHeight / 2f, TEXT_COLOR);
+        y -= lineHeight * 1.5f + 5f;
 
         layout.setText(font, vsLine);
         hbW = Math.max(hbW, layout.width);
@@ -129,7 +135,7 @@ public class StatsRenderer {
 
         // Test
         FontHelper.renderFont(spriteBatch, font,
-                String.format("hb clicked %s, isClickStarting %s, dragX %f", hb.clicked, hb.clickStarted, dragX), 10, 400, Color.WHITE);
+                String.format("hb clicked %s, InputHelper.mX %d, dragX %f", hb.clicked, InputHelper.mX, dragX), 10, 400, Color.WHITE);
 //        renderBox(500, 500, spriteBatch);
 
         // Resize and translate hitbox. Assumes static StatLine width.
