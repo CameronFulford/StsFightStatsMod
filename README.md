@@ -8,7 +8,7 @@ encounters with the enemy.
 ## TODO
 - count loss when run is abandoned
 - save stats to file after loss
-- cosmetic enhancements to stats display. Formatting, color, text effects.
+- use Settings.scale in StatsRenderer
 - add character killed most by enemy
 - add an envelope to saved stats data with a version number to allow for future versioning of the stats model
 - show stats on death screen
@@ -19,6 +19,7 @@ how do we figure out the combat key when loading into an event post combat? Poss
 game. That way, we can load the FightTracker to display as well as extract the last combat key.
 - Mind Bloom combat loads the lastCombatMetricKey as "Mind Bloom Boss Battle". Should I just keep it like that even though
 the bosses might be different? I could also get the name of the monster (boss) from the room.
+- Add mod config options to save/restore text offsets. Other mod config options? Text size?
 
 ## BUGS
 1. Not sure if this is my bug, but after fighting and winning against the double orb walker event, I quit the game before
