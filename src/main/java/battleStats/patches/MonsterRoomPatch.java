@@ -19,6 +19,14 @@ public class MonsterRoomPatch {
         // isBattleOver seems to work for loading into event rooms post-combat. The challenge is the fight stats won't
         // be properly initialized since on load the event room doesn't set the dungeon lastCombatMetricKey.
         // TODO: refactor, cleanup
+        if (shouldRender(_instance)) {
+            // TODO: if this runs prior to battle start or the fight stats have not been initialized, then it renders
+            //  old or null stats.
+            BattleStatsMod.renderStats(spriteBatch);
+        }
+    }
+
+    private static boolean shouldRender(AbstractRoom _instance) {
         if ((_instance instanceof MonsterRoom) || _instance.phase == AbstractRoom.RoomPhase.COMBAT
                 || _instance.isBattleOver) {
             if (_instance.phase == AbstractRoom.RoomPhase.COMBAT || _instance.phase == AbstractRoom.RoomPhase.COMPLETE) {
@@ -29,11 +37,20 @@ public class MonsterRoomPatch {
                     BattleStatsMod.initializeFightStats();
                 }
 
-                if (true) {//BattleStatsMod.shouldRenderStats()) {
-                    // TODO: if this runs prior to battle start or the fight stats have not been initialized, then it renders
-                    //  old or null stats.
-                    BattleStatsMod.renderStats(spriteBatch);
-                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @SpirePatch(
+            clz = AbstractRoom.class,
+            method = "update"
+    )
+    private static class MonsterRoomUpdatePatch {
+        public static void Postfix(AbstractRoom _instance) {
+            if (shouldRender(_instance)) {
+                BattleStatsMod.updateStatsRenderer();
             }
         }
     }

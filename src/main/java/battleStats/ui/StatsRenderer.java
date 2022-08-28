@@ -45,6 +45,10 @@ public class StatsRenderer {
     private Hitbox hb = new Hitbox(0f, 0f);
     private GlyphLayout layout = new GlyphLayout();
     private boolean isClicked = false;
+    private float xAnchor = LABEL_X;
+    private float yAnchor = 0;
+    private float xOffset = 0;
+    private float yOffset = 0;
     private float dragX = 0f;
     private float dragY = 0f;
 
@@ -67,19 +71,37 @@ public class StatsRenderer {
         );
     }
 
+    public void update() {
+        // Check for hitbox dragging
+        hb.update();
+        if (hb.hovered) {
+            if (InputHelper.justClickedLeft) {
+                dragX = InputHelper.mX;
+                dragY = InputHelper.mY - yOffset;
+                isClicked = true;
+//                xOffset = 0;
+//                yOffset = 0;
+                yAnchor = hb.y;
+            }
+        }
+        if (InputHelper.justReleasedClickLeft) {
+            isClicked = false;
+            xAnchor += xOffset;
+//            yAnchor += yOffset;
+            xOffset = 0;
+//            yOffset = 0;
+        }
+        if (isClicked) {
+            xOffset = InputHelper.mX - dragX;
+            yOffset = InputHelper.mY - dragY;
+        }
+    }
+
     public void render(SpriteBatch spriteBatch, EnemyCombatStats stats, FightTracker fightTracker) {
         renderTextPopip();
         // TODO: can we initialize the font on ctor? static initialize didn't work as the font was still null.
         BitmapFont font = FontHelper.tipBodyFont;
         float lineHeight = font.getLineHeight() * Settings.scale;
-
-        // Check for hitbox dragging
-        if (hb.clickStarted || hb.clicked) {
-            isClicked = true;
-        } else {
-            dragX = InputHelper.mX;
-            isClicked = false;
-        }
 
         // Note: general alignment implementation taken from GameOverScreen
 
@@ -115,7 +137,7 @@ public class StatsRenderer {
 
         // Test
         FontHelper.renderFont(spriteBatch, font,
-                String.format("hb clicked %s, isClickStarting %s, InputHelper.mX", hb.clicked, hb.clickStarted, InputHelper.mX), 10, 400, Color.WHITE);
+                String.format("hb clicked %s, isClickStarting %s, dragX %f", hb.clicked, hb.clickStarted, dragX), 10, 400, Color.WHITE);
 //        renderBox(500, 500, spriteBatch);
 
         // Assumes static StatLine width
@@ -124,8 +146,7 @@ public class StatsRenderer {
         hbH = START_Y - y;
         layout.setText(font, vsLine);
         hb.resize(hbW, hbH);
-        hb.translate(LABEL_X + InputHelper.mX - dragX, y);
-        hb.update();
+        hb.translate(xAnchor + xOffset, y + yOffset);
         hb.render(spriteBatch);
     }
 

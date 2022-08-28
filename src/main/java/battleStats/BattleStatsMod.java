@@ -578,6 +578,10 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
         statsRenderer.render(spriteBatch, battleStats, fightTracker);
     }
 
+    public static void updateStatsRenderer() {
+        statsRenderer.update();
+    }
+
     @Override
     public void receivePostUpdate() {
 //        if (CardCrawlGame.isInARun() && AbstractDungeon.player.relics != null && !AbstractDungeon.player.relics.isEmpty()) {
