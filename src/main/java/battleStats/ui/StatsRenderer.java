@@ -45,8 +45,6 @@ public class StatsRenderer {
     private Hitbox hb = new Hitbox(0f, 0f);
     private GlyphLayout layout = new GlyphLayout();
     private boolean isClicked = false;
-    private float xAnchor = LABEL_X;
-    private float yAnchor = 0;
     private float xOffset = 0;
     private float yOffset = 0;
     private float dragX = 0f;
@@ -76,20 +74,13 @@ public class StatsRenderer {
         hb.update();
         if (hb.hovered) {
             if (InputHelper.justClickedLeft) {
-                dragX = InputHelper.mX;
+                dragX = InputHelper.mX - xOffset;
                 dragY = InputHelper.mY - yOffset;
                 isClicked = true;
-//                xOffset = 0;
-//                yOffset = 0;
-                yAnchor = hb.y;
             }
         }
         if (InputHelper.justReleasedClickLeft) {
             isClicked = false;
-            xAnchor += xOffset;
-//            yAnchor += yOffset;
-            xOffset = 0;
-//            yOffset = 0;
         }
         if (isClicked) {
             xOffset = InputHelper.mX - dragX;
@@ -146,7 +137,7 @@ public class StatsRenderer {
         hbH = START_Y - y;
         layout.setText(font, vsLine);
         hb.resize(hbW, hbH);
-        hb.translate(xAnchor + xOffset, y + yOffset);
+        hb.translate(LABEL_X + xOffset, y + yOffset);
         hb.render(spriteBatch);
     }
 
