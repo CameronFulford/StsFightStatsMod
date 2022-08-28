@@ -23,14 +23,19 @@ import java.util.function.BiFunction;
 public class StatsRenderer {
     // TODO: scale X,Y values. Align stats top to bottom of the top panel.
 
+    // TOP_Y value is based on the screen height minus desktop AbstractRelic Y draw position (centered at
+    // Settings.HEIGHT - 102f and a relic image height of 128).
+    // Note: although AbstractRelic seems to indicate the relic renders with a height of 128, in game it appears to be
+    // much less. Not sure why the relic seems smaller.
+    private static final float TOP_Y = Settings.HEIGHT - (102f + 64f);
     private static final float LABEL_X = 10;
     private static final float VALUE_X = 400;
-    private static final float START_Y = 900;
+    private static final float START_Y = TOP_Y;
     private static final float CENTER_X = (VALUE_X + LABEL_X) / 2f;
 
     // TODO: get actual screen width and Y limits to use here for offset limiting
     private static final float MIN_X_OFFSET = -CENTER_X;
-    private static final float MAX_X_OFFSET = 1000f;
+    private static final float MAX_X_OFFSET = Settings.WIDTH - CENTER_X;
     private static final float MIN_Y_OFFSET = -START_Y + 200;
     private static final float MAX_Y_OFFSET = 200;
 
@@ -135,7 +140,8 @@ public class StatsRenderer {
 
         // Test
         FontHelper.renderFont(spriteBatch, font,
-                String.format("hb clicked %s, InputHelper.mX %d, dragX %f", hb.clicked, InputHelper.mX, dragX), 10, 400, Color.WHITE);
+                String.format("Settings.scale %f, TOP_Y %f, Settings.HEIGHT %d, InputHelper.mX %d, InputHelper.mY %d, dragX %f",
+                        Settings.scale, TOP_Y, Settings.HEIGHT, InputHelper.mX, InputHelper.mY, dragX), 10, 400, Color.WHITE);
 //        renderBox(500, 500, spriteBatch);
 
         // Resize and translate hitbox. Assumes static StatLine width.

@@ -161,7 +161,7 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     public static final String CONFIG_FILE_NAME = "config_data";
     private static AtomicBoolean dirtyStats = new AtomicBoolean(false);
 
-    private static StatsRenderer statsRenderer = new StatsRenderer();
+    private static StatsRenderer statsRenderer;
 
     // =============== MAKE IMAGE PATHS =================
     
@@ -345,6 +345,10 @@ public class BattleStatsMod extends OnPlayerDamagedHook implements
     @Override
     public void receivePostInitialize() {
         logger.info("Loading badge image and mod options");
+
+        // Initialize StatsRenderer in PostInitialize since it depends on the Settings object with screen width/height
+        // to be initialized.
+        statsRenderer = new StatsRenderer();
         
         // Load the Mod Badge
         Texture badgeTexture = TextureLoader.getTexture(BADGE_IMAGE);
